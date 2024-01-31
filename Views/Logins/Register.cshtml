@@ -1,0 +1,63 @@
+﻿@model AgileRap_Process2.Models.User
+
+
+
+<h1>Register</h1>
+
+@using (Html.BeginForm("Register", "Logins", FormMethod.Post, new { id = "Registerform" }))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <p style="color:red;"> @ViewBag.InputWarning </p>
+
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> อีเมล : </label>
+                @* @Html.EditorFor(m => m.Email, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+                <p style="color:red;"> @ViewBag.EmailWarning </p>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> รหัสผ่าน : </label>
+                @* @Html.EditorFor(m => m.Password, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+                <p style="color:red;"> @ViewBag.PasswordWarning </p>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> ยืนยันรหัสผ่าน : </label>
+                @* @Html.EditorFor(m => m.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <p style="color:red;"> @ViewBag.PasswordWarning </p>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> ชื่อเล่น : </label>
+                @* @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            
+            
+
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Register" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
+
+<br />
+<div>
+    <a asp-action="Login" asp-controller="Logins" class="btn btn-outline-secondary">Back to Login</a>
+</div>
+

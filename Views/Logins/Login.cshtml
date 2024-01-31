@@ -1,0 +1,61 @@
+﻿@model AgileRap_Process2.Models.User
+
+@{
+}
+
+<h1>Login</h1>
+
+@if (TempData["AlertMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>@TempData["AlertMessage"]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@using (Html.BeginForm("Login", "Logins", FormMethod.Post, new { id = "Loginform" }))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <p style="color:red;"> @ViewBag.Message </p>
+
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> Email: </label>
+                @* @Html.EditorFor(m => m.Email, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <label style="color:red;">*</label><label class="control-label"> Password: </label>
+                @* @Html.EditorFor(m => m.Password, new { htmlAttributes = new { @class = "form-control" } }) *@
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <br />
+            <div>
+                <a asp-action="Register" asp-controller="Logins">Register</a>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Login" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
+@if (ViewBag.Message != null)
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            alert("@ViewBag.Alert");
+        };
+    </script>
+}
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

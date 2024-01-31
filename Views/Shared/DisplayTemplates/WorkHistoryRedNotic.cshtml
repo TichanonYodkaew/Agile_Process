@@ -1,0 +1,143 @@
+﻿@model AgileRap_Process2.Models.Work
+
+@{
+    List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
+    List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+    int totalcount = ViewBag.WorkCount;
+}
+
+<tr style="background-color: Tomato;">
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.CreateDate)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Project)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Name)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.DueDate)
+    </td>
+    <td style="border: 1px solid black;">
+        @foreach (var i in UserDropdownList)
+        {
+            if (Model.CreateBy == int.Parse(i.Value))
+            {
+                @Html.DisplayName(i.Text)
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @{
+            var ProviderCount = Model.Provider.Count(i => i.IsDelete == false);
+            var counter = 0;
+
+            foreach (var i in Model.Provider.Where(io => io.IsDelete == false))
+            {
+                foreach (var j in UserDropdownList)
+                {
+                    if (i.UserID == int.Parse(j.Value))
+                    {
+                        @Html.DisplayName(j.Text)
+                    }
+                }
+                counter++;
+                if (counter < ProviderCount)
+                {
+                    <text>, </text>
+                }
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @foreach (var i in StatusDropdownList)
+        {
+            if (Model.StatusID == int.Parse(i.Value))
+            {
+                @Html.DisplayName(i.Text)
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Remark)
+    </td>
+    <td rowspan="@totalcount" style="background-color: white; border: 1px solid black; border-top:1px solid black;">
+        <div>
+            <div style="float:left; margin-right:10px;">
+                <p>Name : @Html.DisplayFor(m => m.Name)</p>
+            </div>
+            <div style="float:right;">
+                <a class="btn btn-danger" asp-action="Index" asp-controller="Works">Close</a>
+            </div>
+            <div style="clear:both;"></div>
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayName("No")
+                        </th>
+                        <th>
+                            @Html.DisplayName("Description")
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (WorkLog workLog in Model.WorkLogs.Reverse())
+                    {
+                        <tr>
+                            <td style="font-weight:bold">
+                                @Html.DisplayFor(m => workLog.No)
+                            </td>
+                            <td>
+                                <div style="font-size:12px">
+                                    @* @Html.DisplayFor(m => workLog.Description) *@
+                                    @if (workLog.Description != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Description)
+                                        <br />
+                                    }
+                                    @if (workLog.Line7 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line7)
+                                        <br />
+                                    }
+                                    @if (workLog.Line1 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line1)
+                                        <br />
+                                    }
+                                    @if (workLog.Line2 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line2)
+                                        <br />
+                                    }
+                                    @if (workLog.Line3 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line3)
+                                        <br />
+                                    }
+                                    @if (workLog.Line4 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line4)
+                                        <br />
+                                    }
+                                    @if (workLog.Line5 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line5)
+                                        <br />
+                                    }
+                                    @if (workLog.Line6 != null)
+                                    {
+                                        @Html.DisplayFor(m => workLog.Line6)
+                                        <br />
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </td>
+</tr>

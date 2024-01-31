@@ -1,0 +1,125 @@
+﻿@model Work
+
+@{
+    List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
+    List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+}
+
+@Html.HiddenFor(m => m.ID)
+@Html.HiddenFor(m => m.CreateDate)
+@Html.HiddenFor(m => m.UpdateDate)
+@Html.HiddenFor(m => m.IsDelete)
+@Html.HiddenFor(m => m.UpdateBy)
+@Html.HiddenFor(m => m.StatusID)
+@Html.HiddenFor(m => m.CreateBy)
+<input type="hidden" asp-for="ProviderValue" id="ProviderValue" />
+<input type="hidden" asp-for="AllProviderSelected" id="areAllSelected" />
+<input type="hidden" asp-for="ProvidersSelected" id="ProvidersSelected" />
+
+
+<tr>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.CreateDate)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.EditorFor(m => m.Project, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
+    </td>
+
+    <td style="border: 1px solid black;">
+        @Html.EditorFor(m => m.DueDate, new { htmlAttributes = new { @class = "form-control", onchange = "IsChangeDuedate()" , @id = "DueDateID"} })
+    </td>
+
+
+    <td style="border: 1px solid black;">
+        @* @Html.DropDownListFor(m => m.CreateBy, UserDropdownList) *@
+        @foreach (var i in UserDropdownList)
+        {
+            if (Model.CreateBy == int.Parse(i.Value))
+            {
+                @Html.DisplayName(i.Text)
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;" align="center">
+        <div>
+            <select id="select-tops-options" required multiple="multiple">
+                @{
+                    foreach (var providerdata in UserDropdownList)
+                    {
+                            <option value="@providerdata.Value">@providerdata.Text</option>
+                    }
+                }
+            </select>
+        </div>
+    </td>
+    <td style="border: 1px solid black;">
+        @* @Html.DropDownListFor(m => m.StatusID, StatusDropdownList) *@
+        <select id="StatusID" class="form-control" asp-for="StatusID" asp-items="StatusDropdownList" disabled></select>
+    </td>
+
+
+    <td style="border: 1px solid black;">
+        @Html.EditorFor(m => m.Remark, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td style="border: 1px solid black;">
+        <input value="Submit" class="btn btn-success" type="submit" />
+        <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a>
+    </td>
+</tr>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded",
+        () => {
+
+
+            $('#select-tops-options').multiselect({
+                buttonClass: 'form-select',
+                nonSelectedText: 'Select Provider',
+                buttonContainer: '<div id="select-tops-options-container"></div>',
+                selectedClass: 'active multiselect-selected',
+                numberDisplayed: 5,
+                buttonWidth: '18em',
+                includeSelectAllOption: true,
+                onSelectAll: function (options) {
+                    document.getElementById("areAllSelected").value = true;
+                },
+                onDeselectAll: function (options) {
+                    document.getElementById("areAllSelected").value = false;
+                },
+                //includeResetOption: true,
+                //selectAllName: 'select-all-name',
+                onChange: function (option, checked) {
+                    /*
+                     * Not there yet
+                     */
+                    if (checked) {
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[1].ariaChecked = "true";
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[0].ariaChecked = "true";
+                    } else {
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[1].ariaChecked = "false";
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[0].ariaChecked = "false";
+                    }
+
+                    //$("#select-tops-options").multiselect('deselect', '1');
+                    var toppings = $('#select-tops-options option:selected');
+
+                    var selected = [];
+                    $(toppings).each(function (index, item) {
+                        selected.push([$(this).val()]);
+                    });
+                    document.getElementById("areAllSelected").value = false;
+
+                    document.getElementById("ProviderValue").value = selected.join(',');
+                },
+                templates: {
+                    button:
+                        '<button type="button" class="multiselect dropdown-toggle" ' +
+                        'data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                    resetButton: '<div class="multiselect-reset text-center p-2"><button type="button" class="btn btn-sm btn-danger"></button></div>'
+                }
+            });
+
+        });
+</script>

@@ -1,0 +1,105 @@
+﻿@model List<Work>
+
+@{
+    ViewData["Title"] = "Create";
+    List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
+    List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+}
+
+<h1>สร้างรายการงาน</h1>
+
+@using (Html.BeginForm("Create", "Works", FormMethod.Post, new { id = "Workform" }))
+{
+    <table class="table-bordered" style="width:1400px;">
+        <thead style="text-align: center; vertical-align: middle;">
+            <tr>
+                <th style="width:8%">
+                    @Html.DisplayName("Created Date")
+                </th>
+                <th style="width:10%">
+                    @Html.DisplayName("Project")
+                </th>
+                <th style="width:10%">
+                    @Html.DisplayName("Name")
+                </th>
+                <th style="width:12%">
+                    @Html.DisplayName("Due Date")
+                </th>
+                <th style="width:8%">
+                    @Html.DisplayName("Assign By")
+                    <br />
+                    @Html.DisplayName("/ Requester")
+                </th>
+                <th style="width:20%">
+                    @Html.DisplayName("Assign To")
+                    <br />
+                    @Html.DisplayName("/ Provider")
+                </th>
+                <th style="width:9%">
+                    @Html.DisplayName("Status")
+                </th>
+                <th style="width:7%">
+                    @Html.DisplayName("Remark")
+                </th>
+                <th>
+                    @Html.DisplayName("Manage")
+                </th>
+            </tr>
+        </thead>
+        <tbody style="text-align: center; vertical-align: middle;">
+            <!-- ชื่อ Item ต้องตรงกับ ตัวรับใน Controller -->
+            @foreach (Work work in Model)
+            {
+                if (work.ID != 0)
+                {
+                    if (work.RedFlag != true)
+                    {
+                        @Html.DisplayFor(m => work)
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(m => work, "WorkRedNotic")
+                    }
+                }
+                else
+                {
+                    @Html.EditorFor(m => work)
+                }
+            }
+            <tr style="border: 1px solid white;">
+                <td class="text-center">
+                    <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            @* @{
+        Work work = Model[1];
+        }
+        @Html.EditorFor(m => work) *@
+        </tbody>
+    </table>
+}
+@* <div>
+    <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+</div>
+ *@
+
+ <script>
+
+    function IsChangeDuedate() {
+        var dueDateValue = $("#DueDateID").val();
+
+        if (!dueDateValue) {
+            $("#StatusID").val(1);
+        } else {
+            $("#StatusID").val(2);
+        }
+    }
+
+ </script>

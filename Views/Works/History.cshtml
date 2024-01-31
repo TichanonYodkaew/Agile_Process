@@ -1,0 +1,87 @@
+﻿@model List<Work>
+
+@{
+    int HistoryID = ViewBag.WorkHistoryID;
+}
+
+<h1>ประวัติการแก้ไขรายการงาน</h1>
+
+<table style="width:1400px;">
+    <thead  style="text-align: center; vertical-align: middle;">
+        <tr>
+            <th style="border: 1px solid black;width:8%;">
+                @Html.DisplayName("Created Date")
+            </th>
+            <th style="border: 1px solid black;width:10%">
+                @Html.DisplayName("Project")
+            </th>
+            <th style="border: 1px solid black;width:10%">
+                @Html.DisplayName("Name")
+            </th>
+            <th style="border: 1px solid black;width:12%">
+                @Html.DisplayName("Due Date")
+            </th>
+            <th style="border: 1px solid black;width:8%">
+                @Html.DisplayName("Assign By")
+                <br />
+                @Html.DisplayName("/ Requester")
+            </th>
+            <th style="border: 1px solid black;width:20%">
+                @Html.DisplayName("Assign To")
+                <br />
+                @Html.DisplayName("/ Provider")
+            </th>
+            <th style="border: 1px solid black;width:9%">
+                @Html.DisplayName("Status")
+            </th>
+            <th style="border: 1px solid black;width:7%">
+                @Html.DisplayName("Remark")
+            </th>
+            <th style="border: 1px solid white;"></th>
+
+        </tr>
+    </thead>
+    <tbody style="text-align: center; vertical-align: middle;">
+        <!-- ชื่อ Item ต้องตรงกับ ตัวรับใน Controller -->
+        @foreach (Work work in Model)
+        {
+            if(work.ID == HistoryID)
+            {
+                if (work.RedFlag != true)
+                {
+                    @Html.DisplayFor(m => work, "WorkHistory")
+                }
+                else
+                {
+                    @Html.DisplayFor(m => work, "WorkHistoryRedNotic")
+                }
+            }
+            else
+            {
+                if (work.RedFlag != true)
+                {
+                    @Html.DisplayFor(m => work)
+
+                }
+                else
+                {
+                    @Html.DisplayFor(m => work, "WorkRedNotic")
+                }
+            }
+        }
+        <tr>
+            <td class="text-center">
+                <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+@* <div>
+    <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+</div> *@

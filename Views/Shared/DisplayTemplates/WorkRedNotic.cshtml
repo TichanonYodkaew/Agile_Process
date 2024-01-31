@@ -1,0 +1,71 @@
+﻿@model AgileRap_Process2.Models.Work
+
+@{
+    List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
+    List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+}
+
+<tr style="background-color: Tomato;">
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.CreateDate)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Project)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Name)
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.DueDate)
+    </td>
+    <td style="border: 1px solid black;">
+        @foreach (var i in UserDropdownList)
+        {
+            if (Model.CreateBy == int.Parse(i.Value))
+            {
+                @Html.DisplayName(i.Text)
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @{
+            var ProviderCount = Model.Provider.Count(i => i.IsDelete == false);
+            var counter = 0;
+
+            foreach (var i in Model.Provider.Where(io => io.IsDelete == false))
+            {
+                foreach (var j in UserDropdownList)
+                {
+                    if (i.UserID == int.Parse(j.Value))
+                    {
+                        @Html.DisplayName(j.Text)
+                    }
+                }
+                counter++;
+                if (counter < ProviderCount)
+                {
+                    <text>, </text>
+                }
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @foreach (var i in StatusDropdownList)
+        {
+            if (Model.StatusID == int.Parse(i.Value))
+            {
+                @Html.DisplayName(i.Text)
+            }
+        }
+    </td>
+    <td style="border: 1px solid black;">
+        @Html.DisplayFor(m => m.Remark)
+    </td>
+    @if (Model.HistoryPage != true)
+    {
+        <td style="border: 1px solid black;">
+            <a class="btn btn-primary" asp-action="History" asp-controller="Works" asp-route-id="@Model.ID">History</a>
+            <a class="btn btn-warning" asp-action="Edit" asp-controller="Works" asp-route-id="@Model.ID">Edit</a>
+        </td>
+    }
+</tr>
