@@ -1014,7 +1014,7 @@ namespace AgileRap_Process2.Controllers
                 IEnumerable<WorkLog> lastTwoItems = items.TakeLast(2);
 
                 var LastTwoWorkLog = lastTwoItems.ToList();
-                var statusdb = db.Status.ToList();
+                
                 int i = 0;
 
 

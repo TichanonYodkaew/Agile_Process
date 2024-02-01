@@ -27,6 +27,7 @@ namespace AgileRap_Process2.Models
 
         public void Insert(AgileRap_Process2Context dbContext)
         {
+            this.Password = HashingHelper.HashPassword(this.Password);
             this.CreateDate = DateTime.Now;
             this.UpdateDate = DateTime.Now;
             this.IsDelete = false;
@@ -49,6 +50,13 @@ namespace AgileRap_Process2.Models
             data.IsDelete = true;
             dbContext.Entry(data).State = EntityState.Modified;
         }
+
+        //public Work CheckDB (AgileRap_Process2Context dbContext)
+        //{
+        //    var data = dbContext.User.Where(m => m.Email == this.Email && m.Password == this.Password).FirstOrDefault();
+
+        //    return data;
+        //}
     }
     
 }

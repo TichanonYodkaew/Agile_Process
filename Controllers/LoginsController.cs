@@ -11,6 +11,7 @@ using System.Text.Json;
 using NuGet.Packaging;
 using static System.Net.Mime.MediaTypeNames;
 using Microsoft.AspNetCore.Http;
+using BCrypt;
 
 namespace AgileRap_Process2.Controllers
 {
@@ -42,13 +43,17 @@ namespace AgileRap_Process2.Controllers
             }
             else
             {
-                var checkDB = db.User.Where(m => m.Email == user.Email && m.Password == user.Password).FirstOrDefault();
+                string hashedPassword = HashingHelper.HashPassword(user.Password);
+
+                var checkDB = db.User.Where(m => m.Email == user.Email && m.Password == hashedPassword).FirstOrDefault();
+                
+                //var checkDB = db.User.Where(m => m.Email == user.Email && m.Password == user.Password).FirstOrDefault();
 
                 if (checkDB != null)
                 {
                     HttpContext.Session.SetString("UserEmailSession", checkDB.Email);
                     HttpContext.Session.SetString("UserNameSession", checkDB.Name);
-                    HttpContext.Session.SetString("UserIDSession", checkDB.ID.ToString());
+                    //HttpContext.Session.SetString("UserIDSession", checkDB.ID.ToString());
                     GlobalVariable.SetUserID(checkDB.ID);
                     TempData["AlertMessage"] = "ลงชื่อเข้าใช้สำเร็จ! ยินดีต้อนรับ  คุณ " + checkDB.Name;
                     return RedirectToAction("Index", "Works");
@@ -69,7 +74,7 @@ namespace AgileRap_Process2.Controllers
             {
                 HttpContext.Session.Remove("UserEmailSession");
                 HttpContext.Session.Remove("UserNameSession");
-                HttpContext.Session.Remove("UserIDSession");
+                //HttpContext.Session.Remove("UserIDSession");
                 GlobalVariable.ClearGlobalVariable();
                 //HttpContext.Session.Clear();
                 TempData["AlertMessage"] = "ออกจากระบบสำเร็จ!";
@@ -111,6 +116,9 @@ namespace AgileRap_Process2.Controllers
                 }
                 else
                 {
+                    //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                    //user.Password = hashedPassword;
+                    //user.Password = HashingHelper.HashPassword(user.Password);
                     //user.IsDelete = false;
                     //user.CreateDate = DateTime.Now;
                     //user.UpdateDate = DateTime.Now;
