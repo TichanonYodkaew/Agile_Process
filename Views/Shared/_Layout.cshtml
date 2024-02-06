@@ -20,11 +20,20 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+                        </li> *@
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Works" asp-action="Index">Works</a>
+                            @* <a class="nav-link text-dark" asp-area="" asp-controller="Works" asp-action="Index">Works</a> *@
+                            @Html.ActionLink("Works", "Index", "Works", new
+                                {
+                                    RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                                    ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                                    ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                                    StatusFilter = Context.Session.GetString("StatusFilter"),
+                                    IsChangePage = true
+
+                                }, new { @class = "nav-link text-dark" })
                         </li>
 
                     </ul>
@@ -43,17 +52,17 @@
                                 <a class="nav-link text-danger" asp-area="" asp-controller="Logins" asp-action="Logout">Logout</a>
                             </li>
                             @* <div class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Profile
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="profileDropdown">
-                                    <!-- Dropdown menu links go here -->
-                                    <a class="dropdown-item" disabled>@Context.Session.GetString("UserNameSession")</a> 
-                                    <a style="color:darkmagenta;" class="dropdown-item" disabled>@Context.Session.GetString("UserNameSession")</a>
-                                    <a style="color:darkcyan;" class="dropdown-item" disabled>@Context.Session.GetString("UserEmailSession")</a>
-                                    <a class="dropdown-item text-danger" asp-area="" asp-controller="Logins" asp-action="Logout">Logout</a>
-                                </div>
-                            </div> *@
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Profile
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                        <!-- Dropdown menu links go here -->
+                        <a class="dropdown-item" disabled>@Context.Session.GetString("UserNameSession")</a>
+                        <a style="color:darkmagenta;" class="dropdown-item" disabled>@Context.Session.GetString("UserNameSession")</a>
+                        <a style="color:darkcyan;" class="dropdown-item" disabled>@Context.Session.GetString("UserEmailSession")</a>
+                        <a class="dropdown-item text-danger" asp-area="" asp-controller="Logins" asp-action="Logout">Logout</a>
+                        </div>
+                        </div> *@
                         }
                         else
                         {
@@ -73,11 +82,13 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+@*     <footer class="border-top footer text-muted bg-white">
         <div class="container">
             &copy; 2024 - AgileRap_Process2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer>
+    </footer>   *@ 
+    <footer></footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap-multiselect.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

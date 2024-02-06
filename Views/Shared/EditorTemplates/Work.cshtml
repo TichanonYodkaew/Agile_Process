@@ -4,71 +4,83 @@
     List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
     List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
 }
-
-@Html.HiddenFor(m => m.ID)
-@Html.HiddenFor(m => m.CreateDate)
-@Html.HiddenFor(m => m.UpdateDate)
-@Html.HiddenFor(m => m.IsDelete)
-@Html.HiddenFor(m => m.UpdateBy)
-@Html.HiddenFor(m => m.StatusID)
-@Html.HiddenFor(m => m.CreateBy)
-<input type="hidden" asp-for="ProviderValue" id="ProviderValue" />
-<input type="hidden" asp-for="AllProviderSelected" id="areAllSelected" />
-<input type="hidden" asp-for="ProvidersSelected" id="ProvidersSelected" />
-
-
-<tr>
-    <td style="border: 1px solid black;">
-        @Html.DisplayFor(m => m.CreateDate)
-    </td>
-    <td style="border: 1px solid black;">
-        @Html.EditorFor(m => m.Project, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
-    </td>
-    <td style="border: 1px solid black;">
-        @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
-    </td>
-
-    <td style="border: 1px solid black;">
-        @Html.EditorFor(m => m.DueDate, new { htmlAttributes = new { @class = "form-control", onchange = "IsChangeDuedate()" , @id = "DueDateID"} })
-    </td>
+@using (Html.BeginForm("Create", "Works", FormMethod.Post, new { id = "Workform" }))
+{
+    @Html.HiddenFor(m => m.ID)
+    @Html.HiddenFor(m => m.CreateDate)
+    @Html.HiddenFor(m => m.UpdateDate)
+    @Html.HiddenFor(m => m.IsDelete)
+    @Html.HiddenFor(m => m.UpdateBy)
+    @Html.HiddenFor(m => m.StatusID)
+    @Html.HiddenFor(m => m.CreateBy)
+    <input type="hidden" asp-for="ProviderValue" id="ProviderValue" />
+    <input type="hidden" asp-for="AllProviderSelected" id="areAllSelected" />
+    <input type="hidden" asp-for="ProvidersSelected" id="ProvidersSelected" />
 
 
-    <td style="border: 1px solid black;">
-        @* @Html.DropDownListFor(m => m.CreateBy, UserDropdownList) *@
-        @foreach (var i in UserDropdownList)
-        {
-            if (Model.CreateBy == int.Parse(i.Value))
+    <tr>
+        <td style="border: 1px solid black;">
+            @Html.DisplayFor(m => m.CreateDate)
+        </td>
+        <td style="border: 1px solid black;">
+            @Html.EditorFor(m => m.Project, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
+        </td>
+        <td style="border: 1px solid black;">
+            @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
+        </td>
+
+        <td style="border: 1px solid black;">
+            @Html.EditorFor(m => m.DueDate, new { htmlAttributes = new { @class = "form-control", onchange = "IsChangeDuedate()", @id = "DueDateID" } })
+        </td>
+
+
+        <td style="border: 1px solid black;">
+            @* @Html.DropDownListFor(m => m.CreateBy, UserDropdownList) *@
+            @foreach (var i in UserDropdownList)
             {
-                @Html.DisplayName(i.Text)
-            }
-        }
-    </td>
-    <td style="border: 1px solid black;" align="center">
-        <div>
-            <select id="select-tops-options" required multiple="multiple">
-                @{
-                    foreach (var providerdata in UserDropdownList)
-                    {
-                            <option value="@providerdata.Value">@providerdata.Text</option>
-                    }
+                if (Model.CreateBy == int.Parse(i.Value))
+                {
+                    @Html.DisplayName(i.Text)
                 }
-            </select>
-        </div>
-    </td>
-    <td style="border: 1px solid black;">
-        @* @Html.DropDownListFor(m => m.StatusID, StatusDropdownList) *@
-        <select id="StatusID" class="form-control" asp-for="StatusID" asp-items="StatusDropdownList" disabled></select>
-    </td>
+            }
+        </td>
+        <td style="border: 1px solid black;" align="center">
+            <div>
+                <select id="select-tops-options" required multiple="multiple">
+                    @{
+                        foreach (var providerdata in UserDropdownList)
+                        {
+                            <option value="@providerdata.Value">@providerdata.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </td>
+        <td style="border: 1px solid black;">
+            @* @Html.DropDownListFor(m => m.StatusID, StatusDropdownList) *@
+            <select id="StatusID" class="form-control" asp-for="StatusID" asp-items="StatusDropdownList" disabled></select>
+        </td>
 
 
-    <td style="border: 1px solid black;">
-        @Html.EditorFor(m => m.Remark, new { htmlAttributes = new { @class = "form-control" } })
-    </td>
-    <td style="border: 1px solid black;">
-        <input value="Submit" class="btn btn-success" type="submit" />
-        <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a>
-    </td>
-</tr>
+        <td style="border: 1px solid black;">
+            @Html.EditorFor(m => m.Remark, new { htmlAttributes = new { @class = "form-control" } })
+        </td>
+        <td style="border: 1px solid black;">
+            <input value="Submit" class="btn btn-success" type="submit" />
+            @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a> *@
+            @Html.ActionLink("Cancel", "Index", "Works", new
+                {
+                    RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                    ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                    ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                    StatusFilter = Context.Session.GetString("StatusFilter"),
+                    IsChangePage = true
+
+                }, new { @class = "btn btn-danger" })
+        </td>
+    </tr>
+}
+
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded",
         () => {
@@ -84,9 +96,11 @@
                 includeSelectAllOption: true,
                 onSelectAll: function (options) {
                     document.getElementById("areAllSelected").value = true;
+                    document.getElementById("ProviderValue").value = "";
                 },
                 onDeselectAll: function (options) {
                     document.getElementById("areAllSelected").value = false;
+                    document.getElementById("ProviderValue").value = "";
                 },
                 //includeResetOption: true,
                 //selectAllName: 'select-all-name',

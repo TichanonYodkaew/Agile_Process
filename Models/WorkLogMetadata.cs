@@ -44,23 +44,13 @@ namespace AgileRap_Process2.Models
         [NotMapped]
         public string? Line7 { get; set; }
 
-        public void Insert(AgileRap_Process2Context dbContext, Work work)
+        public void Insert(AgileRap_Process2Context dbContext)
         {
             this.CreateBy = GlobalVariable.GetUserID();
             this.UpdateBy = GlobalVariable.GetUserID();
             this.CreateDate = DateTime.Now;
             this.UpdateDate = DateTime.Now;
             this.IsDelete = false;
-            this.Name = work.Name;
-            this.Project = work.Project;
-            this.DueDate = work.DueDate;
-            this.StatusID = work.StatusID;
-            this.Remark = work.Remark;
-
-            if (work.ID != null || work.ID != 0)
-            {
-                this.WorkID = work.ID;
-            }
 
             dbContext.WorkLog.Add(this);
         }

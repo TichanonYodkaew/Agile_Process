@@ -14,41 +14,52 @@ using System.Linq.Expressions;
 
 namespace AgileRap_Process2.Controllers
 {
-    public class WorksController : Controller
+    public class WorksController : BaseController
     {
-        private readonly IEmailSender _emailSender;
+        private IEmailSender _emailSender;
 
-        AgileRap_Process2Context db = new AgileRap_Process2Context();
+        //AgileRap_Process2Context db = new AgileRap_Process2Context(); //dbContext
         static List<SelectListItem> _User = new List<SelectListItem>();
         static List<SelectListItem> _Status = new List<SelectListItem>();
         static List<SelectListItem> _Provider = new List<SelectListItem>();
+        static List<SelectListItem> _Work = new List<SelectListItem>();
+        static List<SelectListItem> _FilterProvider = new List<SelectListItem>();
 
         public WorksController(IEmailSender emailSender)
         {
             _emailSender = emailSender;
         }
 
-        //-- หน้าแรกของ work --//
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> Index(string? RequseterFilter, string? ProviderFilterValue, string? ProjectFilter, string? StatusFilter, bool? IsChangePage, string? changeMode)
         {
-            // *** ตรวจสอบการ Login *** //
+            //! *** ตรวจสอบการ Login *** //
             if (HttpContext.Session.GetString("UserEmailSession") == null)
             {
                 return RedirectToAction("Login", "Logins");
             }
             // *************************** //
 
-            ClearStatic();// <-- เคลีย static ทุกตัวที่มีค่าใน WorksController
+            ClearStatic();//! <-- เคลีย static ทุกตัวที่มีค่าใน WorksController
 
-            var work = await db.Work
-                .Include(so => so.Provider.Where(lo => lo.IsDelete == false))
+            ChangeMode(changeMode);
+            SelectProviderFilter(ProviderFilterValue);
+            //var work = await db.Work
+            //    .Include(so => so.Provider.Where(lo => lo.IsDelete == false))
+            //    .ToListAsync();
+
+            List<Work> work = await db.Work.Include(m => m.Status)
+                .Include(b => b.Provider).ThenInclude(u => u.User)
+                .Include(h => h.WorkLogs).ThenInclude(pl => pl.ProviderLog).ThenInclude(up => up.User)
                 .ToListAsync();
 
-            InitDropdown(); // <-- สร้าง dropdown ที่ต้องใช้
-            AllViewBag(); // <-- เรียก ViewBag ทุดชกอัน
+            work = FilterListWork(work, RequseterFilter, ProviderFilterValue, ProjectFilter, StatusFilter, IsChangePage, null);
 
-            // ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
-            foreach (var item in work)
+            InitDropdown(); //! <-- สร้าง dropdown ที่ต้องใช้
+            AllViewBag(); //! <-- เรียกใช้ ViewBag ทุกอันที่มี
+
+            //! ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
+            foreach (Work item in work)
             {
                 if (item.DueDate == null)
                 {
@@ -67,24 +78,28 @@ namespace AgileRap_Process2.Controllers
         }
 
         // GET: Works/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(string? RequseterFilter, string? ProviderFilterValue, bool ProviderFilterAllSelected, string? ProjectFilter, string? StatusFilter, bool IsChangePage, string? changeMode)
         {
-            // *** ตรวจสอบการ Login *** //
+            //! *** ตรวจสอบการ Login *** //
             if (HttpContext.Session.GetString("UserEmailSession") == null)
             {
                 return RedirectToAction("Login", "Logins");
             }
             // *** *********** *** //
 
-            ClearStatic();
+            ClearStatic(); //!< --เคลีย static ทุกตัวที่มีค่าใน WorksController
 
-            var work = await db.Work
-                .Include(so => so.Provider)
-                .ThenInclude(u => u.User)
-                .ToListAsync(); // <-- เรียกmodel work
+            ChangeMode(changeMode);
+            SelectProviderFilter(ProviderFilterValue);
 
-            // ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
-            foreach (var item in work)
+            List<Work> work = await db.Work.Include(m => m.Status)
+                .Include(b => b.Provider).ThenInclude(u => u.User)
+                .Include(h => h.WorkLogs).ThenInclude(pl => pl.ProviderLog).ThenInclude(up => up.User)
+                .ToListAsync();
+
+            work = FilterListWork(work, RequseterFilter, ProviderFilterValue, ProjectFilter, StatusFilter, IsChangePage, null);
+            //! ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
+            foreach (Work item in work)
             {
                 if (item.DueDate == null)
                 {
@@ -99,7 +114,7 @@ namespace AgileRap_Process2.Controllers
             }
             // ************************************************* //
 
-            // ***************** เพิ่มโมเดลเปล่าที่ใช้ในฟอร์มเข้าไป **********//
+            //! ************** เพิ่มโมเดลเปล่าที่ใช้ในฟอร์มเข้าไป **********//
             work.Add(new Work()
             {
                 StatusID = 1,
@@ -109,9 +124,8 @@ namespace AgileRap_Process2.Controllers
             });
             // ***************** ******************** **********//
 
-
-            InitDropdown();
-            AllViewBag();
+            InitDropdown(); //! <-- สร้าง dropdown ที่ต้องใช้
+            AllViewBag(); //! <-- เรียกใช้ ViewBag ทุกอันที่มี
 
             return View(work);
         }
@@ -123,136 +137,113 @@ namespace AgileRap_Process2.Controllers
         [HttpPost]
         public IActionResult Create(Work work) // ชื่อต้องตรง กับ front ที่ทำการรับข้อมูล
         {
-            var userdb = db.User.ToList();
-            var switchcase = 0;
+            //var userdb = db.User.ToList();
+            //var switchcase = 0; //! --swichcase แบบง่ายๆ กรณี Create
 
-            if (work.DueDate == null)
-            {
-                work.StatusID = 1;
-            }
-            else
-            {
-                work.StatusID = 2;
-            }
+            //work.Provider = new List<Provider>();
+            //work.WorkLogs = new List<WorkLog>();
 
-            work.Provider = new List<Provider>();
-            work.WorkLogs = new List<WorkLog>();
-            WorkLog workLog = new WorkLog();
-            workLog.ProviderLog = new List<ProviderLog>();
+            //WorkLog workLog = new WorkLog();
+            //workLog.ProviderLog = new List<ProviderLog>();
 
-            //workLog.UpdateDate = DateTime.Now;
-            //workLog.CreateDate = DateTime.Now;
-            //workLog.IsDelete = false;
-            //workLog.Name = work.Name;
-            //workLog.Project = work.Project;
-            //workLog.DueDate = work.DueDate;
-            //workLog.StatusID = work.StatusID;
-            //workLog.Remark = work.Remark;
-            //workLog.UpdateBy = work.UpdateBy;
-            //workLog.CreateBy = work.CreateBy;
-            workLog.No = 1;
-            workLog.Insert(db, work);
+            //workLog.No = 1;
+            //workLog.Insert(db, work);
 
+            ////TODO ฟังชันที่ต้องหาวิธียัดลง WorkMetadata
 
-            if (work.AllProviderSelected == true)
-            {
-                var userlist = db.User.ToList();
-                foreach (var i in userlist)
-                {
-                    Provider provider = new Provider();
-                    //provider.IsDelete = false;
-                    //provider.UpdateDate = DateTime.Now;
-                    //provider.CreateDate = DateTime.Now;
-                    //provider.CreateBy = work.CreateBy;
-                    //provider.UpdateBy = work.UpdateBy;
-                    provider.UserID = i.ID;
-                    provider.Insert(db);
-                    work.Provider.Add(provider);
+            //if (work.AllProviderSelected == true) //! กรณีเลือก Provider ทั้งหมด
+            //{
+            //    var userlist = db.User.ToList();
 
-                    ProviderLog providerLog = new ProviderLog();
-                    //providerLog.IsDelete = false;
-                    //providerLog.UpdateDate = DateTime.Now;
-                    //providerLog.CreateDate = DateTime.Now;
-                    //providerLog.CreateBy = work.CreateBy;
-                    //providerLog.UpdateBy = work.UpdateBy;
-                    providerLog.UserID = i.ID;
-                    providerLog.Insert(db);
-                    workLog.ProviderLog.Add(providerLog);
-                }
-            }
-            else
-            {
-                int[] listprovider = Array.ConvertAll(work.ProviderValue.Split(','), int.Parse);
-                foreach (var i in listprovider)
-                {
-                    Provider provider = new Provider();
-                    //provider.IsDelete = false;
-                    //provider.UpdateDate = DateTime.Now;
-                    //provider.CreateDate = DateTime.Now;
-                    //provider.CreateBy = work.CreateBy;
-                    //provider.UpdateBy = work.UpdateBy;
-                    provider.UserID = i;
-                    provider.Insert(db);
-                    work.Provider.Add(provider);
+            //    // เพิ่ม User ทั้งหมด ลง Provider
+            //    foreach (var i in userlist)
+            //    {
+            //        Provider provider = new Provider();
+            //        provider.Insert(db,i.ID);
+            //        work.Provider.Add(provider);
 
-                    ProviderLog providerLog = new ProviderLog();
-                    //providerLog.IsDelete = false;
-                    //providerLog.UpdateDate = DateTime.Now;
-                    //providerLog.CreateDate = DateTime.Now;
-                    //providerLog.CreateBy = work.CreateBy;
-                    //providerLog.UpdateBy = work.UpdateBy;
-                    providerLog.UserID = i;
-                    providerLog.Insert(db);
-                    workLog.ProviderLog.Add(providerLog);
-                }
-            }
-            work.WorkLogs.Add(workLog);
+            //        ProviderLog providerLog = new ProviderLog();
+            //        providerLog.Insert(db, i.ID);
+            //        workLog.ProviderLog.Add(providerLog);
+            //    }
+            //}
+            //else //! กรณีเลือก Provider บางส่วน
+            //{
+            //    int[] listprovider = Array.ConvertAll(work.ProviderValue.Split(','), int.Parse);
+            //    // เพิ่ม User ตามที่เลือก ลง Provider
+            //    foreach (var i in listprovider)
+            //    {
+            //        Provider provider = new Provider();
+            //        provider.Insert(db,i);
+            //        work.Provider.Add(provider);
 
-            //db.Work.Add(work);
-            work.Insert(db);
+            //        ProviderLog providerLog = new ProviderLog();
+            //        providerLog.Insert(db, i);
+            //        workLog.ProviderLog.Add(providerLog);
+            //    }
+            //}
+
+            ////TODO สิ้นสุดฟังชันที่ต้องหาวิธียัดลง WorkMetadata
+            //work.WorkLogs.Add(workLog);
+            work.Insert(db); // บันทึกลง database
             db.SaveChanges();
 
-            List<string> emailList = new List<string>();
-            foreach (var p in work.Provider)
+            //TODO ฟํงก์ชันขั้นทดลอง
+
+            // ส่วนในการรับ อีเมลของคนที่ต้องส่งอีเมลให้
+            //List<string> emailList = new List<string>();
+            //foreach (var p in work.Provider)
+            //{
+            //    var data = userdb.Where(x => x.ID == p.UserID).FirstOrDefault();
+            //    emailList.Add(data.Email);
+            //}
+
+            //SendEmailNotification(work, emailList, switchcase); // ส่วนในการส่งอีเมล
+
+            //TODO สิ้นสุดฟํงก์ชันขั้นทดลอง
+
+            return RedirectToAction("Index", "Works", new
             {
-                var data = userdb.Where(x => x.ID == p.UserID).FirstOrDefault();
-                emailList.Add(data.Email);
-            }
-            SendEmailNotification(work, emailList, switchcase);
-
-            return RedirectToAction("Index");
-
+                RequseterFilter = HttpContext.Session.GetString("RequseterFilter"),
+                ProviderFilterValue = HttpContext.Session.GetString("ProviderFilterValue"),
+                ProjectFilter = HttpContext.Session.GetString("ProjectFilter"),
+                StatusFilter = HttpContext.Session.GetString("StatusFilter"),
+                IsChangePage = true
+            });
         }
 
         // GET: Works/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int EditID, string? RequseterFilter, string? ProviderFilterValue, bool ProviderFilterAllSelected, string? ProjectFilter, string? StatusFilter, bool IsChangePage, string? changeMode)
         {
+            //! *** ตรวจสอบการ Login *** //
             if (HttpContext.Session.GetString("UserEmailSession") == null)
             {
                 return RedirectToAction("Login", "Logins");
             }
-            ClearStatic();
+            // ************* //
 
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            //var work = await db.Work.FindAsync(id);
-            var work = await db.Work
-                .Include(so => so.Provider).Include(log => log.WorkLogs)
+            ClearStatic();//! <-- เคลีย static ทุกตัวที่มีค่าใน WorksController
+
+            ChangeMode(changeMode);
+            SelectProviderFilter(ProviderFilterValue);
+            //var work = await db.Work
+            //    .Include(so => so.Provider).Include(log => log.WorkLogs)
+            //    .ToListAsync();
+
+            List<Work> work = await db.Work.Include(m => m.Status)
+                .Include(b => b.Provider).ThenInclude(u => u.User)
+                .Include(h => h.WorkLogs).ThenInclude(pl => pl.ProviderLog).ThenInclude(up => up.User)
                 .ToListAsync();
 
-            if (work == null)
-            {
-                return NotFound();
-            }
+            work = FilterListWork(work, RequseterFilter, ProviderFilterValue, ProjectFilter, StatusFilter, IsChangePage, EditID);
 
-            ViewBag.WorkEditID = id;
 
-            foreach (var item in work)
+            ViewBag.WorkEditID = EditID;
+
+            foreach (Work item in work)
             {
-                if (item.DueDate == null)
+                if (item.DueDate == null) //! ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
                 {
                     DateTime currentDate = DateTime.Now;
                     TimeSpan timeDifference = (TimeSpan)(currentDate - item.CreateDate);
@@ -263,11 +254,12 @@ namespace AgileRap_Process2.Controllers
                     }
                 }
 
-                if (item.ID == id)
+                if (item.ID == EditID) //! ตรวจหา Work ที่ต้องแก้ไข
                 {
-                    item.RedFlag = false;
+                    item.RedFlag = false; // กรณีที่ Work ที่ต้องแก้ไข แล้วมี Due date ว่างถึงหรือเกิน 2 วัน ไม่ให้ไฮไลท์สีแดง
 
-                    foreach (var i in db.User.ToList())
+                    // สร้าง SelectListItem ของ Provider
+                    foreach (User i in db.User.ToList())
                     {
                         _Provider.Add(new SelectListItem
                         {
@@ -275,10 +267,10 @@ namespace AgileRap_Process2.Controllers
                             Text = i.Name,
                         });
                     }
-
-                    foreach (var item3 in item.Provider.Where(i => i.IsDelete == false))
+                    // ทำให้ SelectListItem ของ Provider ทำการเลือกตัวที่มีใน Provider ของ work
+                    foreach (Provider item3 in item.Provider.Where(i => i.IsDelete == false))
                     {
-                        foreach (var i in _Provider)
+                        foreach (SelectListItem i in _Provider)
                         {
                             if (item3.UserID == int.Parse(i.Value))
                             {
@@ -286,12 +278,11 @@ namespace AgileRap_Process2.Controllers
                             }
                         }
                     }
-                    //ViewBag.ProviderDropdownList = _Provider;
                 }
             }
 
-            InitDropdown();
-            AllViewBag();
+            InitDropdown(); //! <-- สร้าง dropdown ที่ต้องใช้
+            AllViewBag(); //! <-- เรียกใช้ ViewBag ทุกอันที่มี
             return View(work);
         }
 
@@ -302,13 +293,11 @@ namespace AgileRap_Process2.Controllers
         [HttpPost]
         public IActionResult Edit(Work work)
         {
-            var userdbE = db.User.ToList();
-            var switchcase = 1;
-            //work.UpdateDate = DateTime.Now;
-            //work.UpdateBy = int.Parse(HttpContext.Session.GetString("UserIDSession"));
+            //var userdbE = db.User.ToList();
+            //var switchcase = 1;
 
-            // **** ตรวจสอบการเปลี่ยนแปลง  **** //
-            var checkWorkDB = db.Work.Where(m => m.ID == work.ID).Include(p => p.Provider).FirstOrDefault();
+            //! **** เริ่มการตรวจสอบการเปลี่ยนแปลง  **** //
+            Work checkWorkDB = db.Work.Where(m => m.ID == work.ID).Include(p => p.Provider).FirstOrDefault();
 
             bool flagProject = false;
             bool flagName = false;
@@ -349,237 +338,87 @@ namespace AgileRap_Process2.Controllers
             }
 
             db.ChangeTracker.Clear();
-            // **** ตรวจสอบการเปลี่ยนแปลง  **** //
+            // **** สิ้นสุดการตรวจสอบการเปลี่ยนแปลง  **** //
 
 
-            //กรณีที่ไม่มีการเปลี่ยนแปลง
+            //!กรณีที่ไม่มีการเปลี่ยนแปลง
             if (!flagProject && !flagName && !flagDuedate && !flagStatus && !flagRemark && !flagSelectAllProvider && !flagProvidervalue)
             {
-                //db.Work.Update(work);
-                work.Update(db);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                //return RedirectToAction("Index");
+                return RedirectToAction("Index", "Works", new
+                {
+                    RequseterFilter = HttpContext.Session.GetString("RequseterFilter"),
+                    ProviderFilterValue = HttpContext.Session.GetString("ProviderFilterValue"),
+                    ProjectFilter = HttpContext.Session.GetString("ProjectFilter"),
+                    StatusFilter = HttpContext.Session.GetString("StatusFilter"),
+                    IsChangePage = true
+                });
             }
 
-            //กรณีที่มีการเปลี่ยนแปลง
+            //!กรณีที่มีการเปลี่ยนแปลง
             else
             {
-                WorkLog workLog = new WorkLog();
-                //workLog.UpdateDate = DateTime.Now;
-                //workLog.CreateDate = DateTime.Now;
-                //workLog.IsDelete = false;
-                //workLog.Name = work.Name;
-                //workLog.Project = work.Project;
-                //workLog.DueDate = work.DueDate;
-                //workLog.StatusID = work.StatusID;
-                //workLog.Remark = work.Remark;
-                //workLog.CreateBy = work.UpdateBy;
-                //workLog.UpdateBy = work.UpdateBy;
-
-                workLog.No = work.WorkLogs.Count + 1;
-                workLog.Insert(db, work);
-
-                workLog.ProviderLog = new List<ProviderLog>();
-
-
-                if (work.Provider != null)
-                {
-                    if (work.AllProviderSelected == true)
-                    {
-                        var userlistdb = db.User.ToList();
-
-                        foreach (var workprovider in work.Provider)
-                        {
-                            bool alreadyExist = false;
-                            foreach (var userdb in userlistdb)
-                            {
-                                if (workprovider.UserID == userdb.ID)
-                                {
-                                    alreadyExist = true;
-                                    if (workprovider.IsDelete == true)
-                                    {
-                                        //db.Entry(workprovider).State = EntityState.Modified;
-                                        //workprovider.UpdateDate = DateTime.Now;
-                                        //workprovider.IsDelete = false;
-                                        workprovider.Restore(db);
-                                    }
-                                    userlistdb.Remove(userdb);
-                                    break;
-                                }
-                            }
-                            if (alreadyExist == false)
-                            {
-                                //db.Entry(workprovider).State = EntityState.Modified;
-                                //workprovider.UpdateDate = DateTime.Now;
-                                //workprovider.IsDelete = true;
-                                workprovider.Delete(db);
-                            }
-                        }
-
-                        if (userlistdb.Count > 0)
-                        {
-                            foreach (var i in userlistdb)
-                            {
-                                Provider provider = new Provider();
-                                //provider.IsDelete = false;
-                                //provider.UpdateDate = DateTime.Now;
-                                //provider.CreateDate = DateTime.Now;
-                                //provider.CreateBy = work.UpdateBy;
-                                //provider.UpdateBy = work.UpdateBy;
-                                provider.UserID = i.ID;
-                                provider.WorkID = work.ID;
-                                provider.Insert(db);
-                                work.Provider.Add(provider);
-
-                                ProviderLog providerLog = new ProviderLog();
-                                //providerLog.IsDelete = false;
-                                //providerLog.UpdateDate = DateTime.Now;
-                                //providerLog.CreateDate = DateTime.Now;
-                                //providerLog.CreateBy = work.UpdateBy;
-                                //providerLog.UpdateBy = work.UpdateBy;
-                                providerLog.UserID = i.ID;
-                                providerLog.Insert(db);
-                                workLog.ProviderLog.Add(providerLog);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (work.ProviderValue != null)
-                        {
-                            List<int> listNewProvider = new List<int>(Array.ConvertAll(work.ProviderValue.Split(','), int.Parse));
-
-                            foreach (var q in listNewProvider)
-                            {
-
-                                ProviderLog providerLog = new ProviderLog();
-                                //providerLog.IsDelete = false;
-                                //providerLog.UpdateDate = DateTime.Now;
-                                //providerLog.CreateDate = DateTime.Now;
-                                //providerLog.CreateBy = work.UpdateBy;
-                                //providerLog.UpdateBy = work.UpdateBy;
-                                providerLog.UserID = q;
-                                providerLog.Insert(db);
-                                workLog.ProviderLog.Add(providerLog);
-                            }
-
-                            foreach (var workprovider in work.Provider)
-                            {
-                                bool alreadyExist = false;
-
-                                foreach (var newListProvider in listNewProvider)
-                                {
-                                    if (workprovider.UserID == newListProvider)
-                                    {
-                                        alreadyExist = true;
-
-                                        if (workprovider.IsDelete == true)
-                                        {
-                                            //db.Entry(workprovider).State = EntityState.Modified;
-                                            //workprovider.UpdateDate = DateTime.Now;
-                                            //workprovider.IsDelete = false;
-                                            workprovider.Restore(db);
-                                        }
-                                        listNewProvider.Remove(newListProvider);
-                                        break;
-                                    }
-                                }
-                                if (alreadyExist == false)
-                                {
-                                    //db.Entry(workprovider).State = EntityState.Modified;
-                                    //workprovider.UpdateDate = DateTime.Now;
-                                    //workprovider.IsDelete = true;
-                                    workprovider.Delete(db);
-                                }
-                            }
-
-                            if (listNewProvider.Count > 0)
-                            {
-                                foreach (var i in listNewProvider)
-                                {
-                                    Provider provider = new Provider();
-                                    //provider.IsDelete = false;
-                                    //provider.UpdateDate = DateTime.Now;
-                                    //provider.CreateDate = DateTime.Now;
-                                    //provider.CreateBy = work.UpdateBy;
-                                    //provider.UpdateBy = work.UpdateBy;
-                                    provider.UserID = i;
-                                    provider.WorkID = work.ID;
-                                    provider.Insert(db);
-                                    work.Provider.Add(provider);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (var i in work.Provider)
-                            {
-                                ProviderLog providerLog = new ProviderLog();
-                                //providerLog.IsDelete = false;
-                                //providerLog.UpdateDate = DateTime.Now;
-                                //providerLog.CreateDate = DateTime.Now;
-                                //providerLog.CreateBy = work.UpdateBy;
-                                //providerLog.UpdateBy = work.UpdateBy;
-                                providerLog.UserID = i.UserID;
-                                providerLog.Insert(db);
-                                workLog.ProviderLog.Add(providerLog);
-                            }
-                        }
-                    }
-                    work.WorkLogs.Add(workLog);
-                }
-
-                //db.Entry(work).State = EntityState.Modified;
-                //db.Work.Update(work);
                 work.Update(db);
                 db.SaveChanges();
 
-                List<string> emailList = new List<string>();
-                foreach (var p in work.Provider)
+                //TODO ฟํงก์ชันขั้นทดลอง
+                //List<string> emailList = new List<string>();
+                //foreach (var p in work.Provider)
+                //{
+                //    var data = userdbE.Where(x => x.ID == p.UserID).FirstOrDefault();
+                //    emailList.Add(data.Email);
+                //}
+                //SendEmailNotification(work, emailList, switchcase);
+                //TODO สิ้นสุดฟํงก์ชันขั้นทดลอง
+
+                //return RedirectToAction("Index");
+                return RedirectToAction("Index", "Works", new
                 {
-                    var data = userdbE.Where(x => x.ID == p.UserID).FirstOrDefault();
-                    emailList.Add(data.Email);
-                }
-                SendEmailNotification(work, emailList, switchcase);
-
-                return RedirectToAction("Index");
+                    RequseterFilter = HttpContext.Session.GetString("RequseterFilter"),
+                    ProviderFilterValue = HttpContext.Session.GetString("ProviderFilterValue"),
+                    ProjectFilter = HttpContext.Session.GetString("ProjectFilter"),
+                    StatusFilter = HttpContext.Session.GetString("StatusFilter"),
+                    IsChangePage = true
+                });
             }
-
         }
 
-        public async Task<IActionResult> History(int? id)
+        public async Task<IActionResult> History(int HistoryID, string? RequseterFilter, string? ProviderFilterValue, bool ProviderFilterAllSelected, string? ProjectFilter, string? StatusFilter, bool IsChangePage, string? changeMode)
         {
+            //! *** ตรวจสอบการ Login *** //
             if (HttpContext.Session.GetString("UserEmailSession") == null)
             {
                 return RedirectToAction("Login", "Logins");
             }
-            ClearStatic();
+            // ************************ //
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+            ClearStatic();//! <-- เคลีย static ทุกตัวที่มีค่าใน WorksController
 
-            //var work = await db.Work.FindAsync(id);
-            var work = await db.Work
-                .Include(s => s.Status)
-                .Include(po => po.Provider)
-                .Include(log => log.WorkLogs)
+
+            //var work = await db.Work
+            //    .Include(s => s.Status)
+            //    .Include(po => po.Provider)
+            //    .Include(log => log.WorkLogs)
+            //    .ToListAsync();
+
+            ChangeMode(changeMode);
+            SelectProviderFilter(ProviderFilterValue);
+
+            List<Work> work = await db.Work.Include(m => m.Status)
+                .Include(b => b.Provider).ThenInclude(u => u.User)
+                .Include(h => h.WorkLogs).ThenInclude(pl => pl.ProviderLog).ThenInclude(up => up.User)
                 .ToListAsync();
 
-            if (work == null)
-            {
-                return NotFound();
-            }
+            work = FilterListWork(work, RequseterFilter, ProviderFilterValue, ProjectFilter, StatusFilter, IsChangePage, HistoryID);
 
             ViewBag.WorkCount = work.Count;
-            ViewBag.WorkHistoryID = id;
+            ViewBag.WorkHistoryID = HistoryID;
 
-            foreach (var item in work)
+            foreach (Work item in work)
             {
-                item.HistoryPage = true;
+                item.HistoryPage = true; //เพื่อเซ็ตให้ทุก work แสดงสำหรับหน้า History (ไม่ให้แสดงส่วน manage)
 
-                if (item.DueDate == null)
+                if (item.DueDate == null) //! ******* ตรวจสอบ work ที่มี due date ว่างถึง 2 วัน ********* //
                 {
                     DateTime currentDate = DateTime.Now;
                     TimeSpan timeDifference = (TimeSpan)(currentDate - item.CreateDate);
@@ -590,70 +429,63 @@ namespace AgileRap_Process2.Controllers
                     }
                 }
 
-                if (item.ID == id)
+                if (item.ID == HistoryID) //กรณีที่ ID ตรงกัน
                 {
                     item.WorkLogs.Clear();
 
-                    var workLog = db.WorkLog.Where(d => d.WorkID == id)
+                    List<WorkLog> workLog = db.WorkLog.Where(d => d.WorkID == HistoryID)
                         .Include(i => i.Status)
                         .Include(o => o.ProviderLog).ThenInclude(oi => oi.User)
                         .ToList();
 
-                    if (workLog.Count > 1)
+                    if (workLog.Count > 1)// กรณีที่ workLog มีมากกว่า 1
                     {
-                        for (int i = 0; i < workLog.Count() - 1; i++)
+                        for (int i = 0; i < workLog.Count() - 1; i++)//เทียบ workLog ตัวปัจจุบันกับ workLog ตัวต่อไป
                         {
-                            //workLog[i].Description = "";
-                            //if (workLog[i].Project != workLog[i + 1].Project) { workLog[i].Description += "Project : " + workLog[i].Project + "->" + workLog[i + 1].Project; }
-                            //if (workLog[i].Name != workLog[i + 1].Name) { workLog[i].Description += "Name : " + workLog[i].Name + "->" + workLog[i + 1].Name; }
-                            //if (workLog[i].DueDate != workLog[i + 1].DueDate) { workLog[i].Description += "DueDate : " + workLog[i].DueDate + "->" + workLog[i + 1].DueDate; }
-                            //if (workLog[i].StatusID != workLog[i + 1].StatusID) { workLog[i].Description += "Status : " + workLog[i].Status.StatusName + "->" + workLog[i + 1].Status.StatusName;}
-                            //if (workLog[i].Remark != workLog[i + 1].Remark) { workLog[i].Description += "Remark : " + workLog[i].Remark + "->" + workLog[i + 1].Remark; }
-
-                            if (workLog[i] != workLog.LastOrDefault())
+                            if (workLog[i] != workLog.LastOrDefault())// กรณีที่ workLog[i] ไม่ใช่ตัวสุดท้าย
                             {
 
-                                if (workLog[i].Project != workLog[i + 1].Project)
+                                if (workLog[i].Project != workLog[i + 1].Project) // กรณีที่ Project ไม่ตรงกัน
                                 {
                                     workLog[i].Line1 = "";
                                     workLog[i].Line1 += "Project : " + workLog[i].Project + " -> " + workLog[i + 1].Project;
                                 }
-                                if (workLog[i].Name != workLog[i + 1].Name)
+                                if (workLog[i].Name != workLog[i + 1].Name)// กรณีที่ Name ไม่ตรงกัน
                                 {
                                     workLog[i].Line2 = "";
                                     workLog[i].Line2 += "Name : " + workLog[i].Name + " -> " + workLog[i + 1].Name;
                                 }
-                                if (workLog[i].DueDate != workLog[i + 1].DueDate)
+                                if (workLog[i].DueDate != workLog[i + 1].DueDate)// กรณีที่ DueDate ไม่ตรงกัน
                                 {
                                     workLog[i].Line3 = "";
 
-                                    if (workLog[i].DueDate != null)
+                                    if (workLog[i].DueDate != null) // กรณี workLog ตัวปัจจุบัน มีค่า
                                     {
                                         DateTime specifiedDate = (DateTime)workLog[i].DueDate;
                                         string formattedDate = specifiedDate.ToString("dd/MM/yyyy");
-                                        if (workLog[i + 1].DueDate != null)
+                                        if (workLog[i + 1].DueDate != null) // กรณี workLog ตัวต่อไป มีค่า
                                         {
                                             DateTime specifiedDate2 = (DateTime)workLog[i + 1].DueDate;
                                             string formattedDate2 = specifiedDate2.ToString("dd/MM/yyyy");
                                             workLog[i].Line3 += "DueDate : " + formattedDate + " -> " + formattedDate2;
                                         }
-                                        else
+                                        else //กรณี workLog ตัวต่อไป ไม่มีค่า
                                         {
                                             string formattedDate2 = " N/A ";
                                             workLog[i].Line3 += "DueDate : " + formattedDate + " -> " + formattedDate2;
                                         }
 
                                     }
-                                    else
+                                    else// กรณี workLog ตัวปัจจุบัน ไม่มีค่า
                                     {
                                         string formattedDate = " N/A ";
-                                        if (workLog[i + 1].DueDate != null)
+                                        if (workLog[i + 1].DueDate != null) //กรณี workLog ตัวต่อไป มีค่า
                                         {
                                             DateTime specifiedDate2 = (DateTime)workLog[i + 1].DueDate;
                                             string formattedDate2 = specifiedDate2.ToString("dd/MM/yyyy");
                                             workLog[i].Line3 += "DueDate : " + formattedDate + " -> " + formattedDate2;
                                         }
-                                        else
+                                        else //กรณี workLog ตัวต่อไป ไม่มีค่า(ป้องกันระเบิด)
                                         {
                                             string formattedDate2 = " N/A ";
                                             workLog[i].Line3 += "DueDate : " + formattedDate + " -> " + formattedDate2;
@@ -662,26 +494,25 @@ namespace AgileRap_Process2.Controllers
                                     }
 
                                 }
-                                if (workLog[i].StatusID != workLog[i + 1].StatusID)
+                                if (workLog[i].StatusID != workLog[i + 1].StatusID) // กรณีที่ StatusID ไม่ตรงกัน
                                 {
                                     workLog[i].Line4 = "";
                                     workLog[i].Line4 += "Status : " + workLog[i].Status.StatusName + " -> " + workLog[i + 1].Status.StatusName;
                                 }
-                                if (workLog[i].Remark != workLog[i + 1].Remark)
+                                if (workLog[i].Remark != workLog[i + 1].Remark) // กรณีที่ Remark ไม่ตรงกัน
                                 {
                                     workLog[i].Line5 = "";
                                     workLog[i].Line5 += "Remark : " + workLog[i].Remark + " -> " + workLog[i + 1].Remark;
                                 }
 
+                                // แสดงชื่อผู้แก้ไข พร้อมเวลาที่แก้ไข
                                 workLog[i].Line7 = "";
-                                var Updater1 = db.User.Where(m => m.ID == workLog[i + 1].UpdateBy).FirstOrDefault();
+                                User Updater1 = db.User.Where(m => m.ID == workLog[i + 1].UpdateBy).FirstOrDefault();
                                 workLog[i].Line7 += "Update by : " + Updater1.Name + ",  on " + workLog[i + 1].UpdateDate.Value.ToString("dd/MM/yyyy hh:mm tt");
 
-
+                                //***** เทียบ ProviderLog ***** ///
                                 if (workLog[i].ProviderLog != null)
                                 {
-                                    //if (!workLog[i].ProviderLog.SequenceEqual(workLog[i + 1].ProviderLog))
-
                                     int tempcounter = 0;
                                     int tempcounter2 = 0;
 
@@ -691,7 +522,7 @@ namespace AgileRap_Process2.Controllers
                                     string temppro1 = "";
                                     string temppro2 = "";
 
-                                    foreach (var tp1 in workLog[i].ProviderLog)
+                                    foreach (ProviderLog tp1 in workLog[i].ProviderLog)
                                     {
                                         temppro1 += tp1.User.Name;
 
@@ -704,7 +535,7 @@ namespace AgileRap_Process2.Controllers
 
                                     }
 
-                                    foreach (var tp2 in workLog[i + 1].ProviderLog)
+                                    foreach (ProviderLog tp2 in workLog[i + 1].ProviderLog)
                                     {
                                         temppro2 += tp2.User.Name;
 
@@ -717,9 +548,7 @@ namespace AgileRap_Process2.Controllers
 
                                     }
 
-
-                                    //if (workLog[i].ProviderLog != workLog[i + 1].ProviderLog)
-                                    if (temppro1 != temppro2)
+                                    if (temppro1 != temppro2) // กรณีที่ Provider ไม่ตรงกัน (เทียบ String)
                                     {
                                         workLog[i].Line6 = "";
                                         workLog[i].Line6 += "Provider : ";
@@ -727,164 +556,21 @@ namespace AgileRap_Process2.Controllers
                                         string pro1 = temppro1;
                                         string pro2 = temppro2;
 
-                                        //int counter = 0;
-                                        //int counter2 = 0;
-
-                                        //int ProviderCount = workLog[i].ProviderLog.Count();
-                                        //int ProviderCount2 = workLog[i + 1].ProviderLog.Count();
-
-                                        //string pro1 = "";
-                                        //string pro2 = "";
-
-                                        //foreach (var p1 in workLog[i].ProviderLog)
-                                        //{
-                                        //    pro1 += p1.User.Name;
-
-                                        //    counter++;
-
-                                        //    if (counter < ProviderCount)
-                                        //    {
-                                        //        pro1 += ", ";
-                                        //    }
-
-                                        //}
-
-                                        //foreach (var p2 in workLog[i + 1].ProviderLog)
-                                        //{
-                                        //    pro2 += p2.User.Name;
-
-                                        //    counter2++;
-
-                                        //    if (counter2 < ProviderCount2)
-                                        //    {
-                                        //        pro2 += ", ";
-                                        //    }
-
-                                        //}
-
                                         workLog[i].Line6 += pro1 + " -> " + pro2;
 
                                     }
-
-
                                 }
-
-
+                                //***** สิ้นสุดการเทียบ ProviderLog ***** ///
                             }
-                            //else
-                            //{
-                            //    workLog[i].Line1 = "";
-                            //    workLog[i].Line2 = "";
-                            //    workLog[i].Line3 = "";
-                            //    workLog[i].Line4 = "";
-                            //    workLog[i].Line5 = "";
-                            //    workLog[i].Line7 = "";
-
-                            //    workLog[i].Line1 += "Project : " + workLog[i].Project;
-                            //    workLog[i].Line2 += "Name : " + workLog[i].Name;
-                            //    //workLog[i].Line3 += "DueDate : " + workLog[i].DueDate;
-
-                            //    if (workLog[i].DueDate != null)
-                            //    {
-                            //        DateTime specifiedDate = (DateTime)workLog[i].DueDate;
-                            //        string formattedDate = specifiedDate.ToString("dd/MM/yyyy");
-                            //        workLog[i].Line3 += "DueDate : " + formattedDate;
-                            //    }
-                            //    else
-                            //    {
-                            //        string formattedDate = " N/A ";
-                            //        workLog[i].Line3 += "DueDate : " + formattedDate;
-                            //    }
-
-                            //    workLog[i].Line4 += "Status : " + workLog[i].Status.StatusName;
-
-                            //    workLog[i].Line5 += "Remark : " + workLog[i].Remark;
-
-                            //    var Updater = db.User.Where(m => m.ID == workLog[i].UpdateBy).FirstOrDefault();
-                            //    workLog[i].Line7 += "UpdateBy : " + Updater.Name;
-
-                            //    if (workLog[i].ProviderLog != null)
-                            //    {
-                            //        workLog[i].Line6 = "";
-                            //        workLog[i].Line6 += "Provider : ";
-                            //        int counter = 0;
-                            //        int ProviderCount = workLog[i].ProviderLog.Count();
-                            //        foreach (var p in workLog[i].ProviderLog)
-                            //        {
-                            //            workLog[i].Line6 += p.User.Name;
-
-                            //            counter++;
-
-                            //            if (counter < ProviderCount)
-                            //            {
-                            //                workLog[i].Line6 += ", ";
-                            //            }
-
-                            //        }
-                            //    }
-                            //}
-
-
                             item.WorkLogs.Add(workLog[i]);
                         }
                     }
-                    else if (workLog.Count == 1)
+                    else if (workLog.Count == 1) // กรณีที่ workLog มีเพียง 1 ตัว
                     {
                         for (int i = 0; i < workLog.Count; i++)
                         {
+                            //แสดงประโยคว่า "ยังไม่มีการเปลี่ยนแปลงเกิดขึ้น"
                             workLog[i].Description = " No change. ";
-                            //workLog[i].Line1 = "";
-                            //workLog[i].Line2 = "";
-                            //workLog[i].Line3 = "";
-                            //workLog[i].Line4 = "";
-                            //workLog[i].Line5 = "";
-                            //workLog[i].Line7 = "";
-
-                            ////workLog[i].Description += "Project : " + workLog[i].Project;
-                            ////workLog[i].Description += "Name : " + workLog[i].Name;
-                            ////workLog[i].Description += "DueDate : " + workLog[i].DueDate;
-                            ////workLog[i].Description += "Status : " + workLog[i].Status.StatusName;
-                            ////workLog[i].Description += "Remark : " + workLog[i].Remark;
-                            //workLog[i].Line1 += "Project : " + workLog[i].Project;
-                            //workLog[i].Line2 += "Name : " + workLog[i].Name;
-                            ////workLog[i].Line3 += "DueDate : " + workLog[i].DueDate;
-                            //if (workLog[i].DueDate != null)
-                            //{
-                            //    DateTime specifiedDate = (DateTime)workLog[i].DueDate;
-                            //    string formattedDate = specifiedDate.ToString("dd/MM/yyyy");
-                            //    workLog[i].Line3 += "DueDate : " + formattedDate;
-                            //}
-                            //else
-                            //{
-                            //    string formattedDate = " N/A ";
-                            //    workLog[i].Line3 += "DueDate : " + formattedDate;
-                            //}
-                            //workLog[i].Line4 += "Status : " + workLog[i].Status.StatusName;
-                            //workLog[i].Line5 += "Remark : " + workLog[i].Remark;
-
-                            //var Updater = db.User.Where(m => m.ID == workLog[i].UpdateBy).FirstOrDefault();
-                            //workLog[i].Line7 += "UpdateBy : " + Updater.Name;
-
-                            //if (workLog[i].ProviderLog != null)
-                            //{
-                            //    workLog[i].Line6 = "";
-                            //    workLog[i].Line6 += "Provider : ";
-                            //    int counter = 0;
-                            //    int ProviderCount = workLog[i].ProviderLog.Count();
-                            //    foreach (var p in workLog[i].ProviderLog)
-                            //    {
-                            //        workLog[i].Line6 += p.User.Name;
-
-                            //        counter++;
-
-                            //        if (counter < ProviderCount)
-                            //        {
-                            //            workLog[i].Line6 += ", ";
-                            //        }
-
-                            //    }
-                            //}
-
                             item.WorkLogs.Add(workLog[i]);
                         }
 
@@ -892,27 +578,29 @@ namespace AgileRap_Process2.Controllers
                 }
             }
 
-
-            InitDropdown();
-            AllViewBag();
+            InitDropdown(); //! <-- สร้าง dropdown ที่ต้องใช้
+            AllViewBag(); //! <-- เรียกใช้ ViewBag ทุกอันที่มี
             return View(work);
         }
 
 
-        private bool WorkExists(int id)
+        private bool WorkExists(int id) // <-- Gen ขึ้นมาเอง ไม่กล้าลบ
         {
             return db.Work.Any(e => e.ID == id);
         }
 
-        private void AllViewBag()
+        private void AllViewBag() //! <-- สำหรับเรียกใช้ ViewBag ทุกอันที่มี
         {
             ViewBag.UserDropdown = _User;
             ViewBag.StatusDropdown = _Status;
             ViewBag.ProviderDropdownList = _Provider;
+            ViewBag.ProjectDropdownList = _Work;
+            ViewBag.FilterProviderDropdownList = _FilterProvider;
         }
-        private void InitDropdown()
+        private void InitDropdown() //! <-- สำหรับสร้าง dropdown ที่ต้องใช้
         {
-            var UserList = db.User
+            //สร้าง dropdown User
+            List<SelectListItem> UserList = db.User
                             .Select(u => new SelectListItem
                             {
                                 Value = u.ID.ToString(),
@@ -920,58 +608,77 @@ namespace AgileRap_Process2.Controllers
                             }).ToList();
             _User = UserList;
 
-            var StatusList = db.Status
+            //สร้าง dropdown Status
+            List<SelectListItem> StatusList = db.Status
                             .Select(s => new SelectListItem
                             {
                                 Value = s.ID.ToString(),
                                 Text = s.StatusName
                             }).ToList();
             _Status = StatusList;
+
+            //var WorkList = db.Work
+            //                .Select(u => new SelectListItem
+            //                {
+            //                    Value = u.Project,
+            //                    Text = u.Project
+            //                }).ToList();
+            List<SelectListItem> WorkList = db.Work
+                            .Select(u => u.Project)
+                            .Distinct()
+                            .Select(project => new SelectListItem
+                            {
+                                Value = project,
+                                Text = project
+                            }).ToList();
+            _Work = WorkList;
         }
 
-        private void ClearStatic()
+        private void ClearStatic() //! <-- สำหรับเคลีย static ทุกตัวที่มีค่าใน WorksController
         {
             _Provider.Clear();
             _Status.Clear();
             _User.Clear();
+            _FilterProvider.Clear();
+            _Work.Clear();
         }
 
-        private void SendEmailNotification(Work work, List<string> emailList, int switchcase)
+        private void SendEmailNotification(Work work, List<string> emailList, int switchcase) //! <--ฟังก์ชันในการส่งอีเมล
         {
-            if (switchcase == 0)
+            if (switchcase == 0) //กรณีที่ Create Work
             {
-                var subject = "New AgileRap Work!!";
+                string subject = "New AgileRap Work!!"; //หัวข้ออีเมล
 
-                var DuedateMailString = "";
+                string DuedateMailString = ""; //สำหรับแสดง Due date
 
-                if (work.DueDate != null)
+                if (work.DueDate != null) //กรณี work.DueDate มีค่า
                 {
                     DateTime specifiedDate = (DateTime)work.DueDate;
                     DuedateMailString = specifiedDate.ToString("dd/MMM/yyyy");
                 }
-                else
+                else //กรณี work.DueDate ไม่มีค่า
                 {
                     DuedateMailString = "N/A";
                 }
 
-                var RemarkMailString = "";
+                string RemarkMailString = ""; //สำหรับแสดง Remark
 
-                if (work.Remark != null)
+                if (work.Remark != null) //กรณี work.Remark มีค่า
                 {
                     RemarkMailString = work.Remark;
                 }
-                else
+                else //กรณี work.Remark ไม่มีค่า
                 {
                     RemarkMailString = "N/A";
                 }
 
-                var ProviderMailString = "";
+                string ProviderMailString = ""; //สำหรับแสดง Provider
 
-                if (work.Provider != null)
+                if (work.Provider != null) //กรณี work.Provider มีค่า
                 {
                     int tempcounter = 0;
                     int tempProviderCount = work.Provider.Count;
-                    foreach (var p in work.Provider)
+                    foreach (Provider p in work.Provider)
                     {
                         ProviderMailString += p.User.Name;
 
@@ -984,81 +691,90 @@ namespace AgileRap_Process2.Controllers
 
                     }
                 }
-                else
+                else //กรณี work.Provider ไม่มีค่า
                 {
                     ProviderMailString = "N/A";
                 }
 
+                User finduser = db.User.Where(u => u.ID == work.CreateBy).FirstOrDefault();
+
+                // เนื้อหาอีเมล
                 string emailBody = "<h3>Hello, this is a new job for you.</h3>" +
+                    "<p><strong>Assign by</strong> :  " + finduser.Name + " </p>" +
                     "<p><strong>Project</strong> : " + work.Project + "</p>" +
                     "<p><strong>Name</strong> : " + work.Name + "</p>" +
                     "<p><strong>Duedate</strong> : " + DuedateMailString + "</p>" +
                     "<p><strong>Provider</strong> : " + ProviderMailString + "</p>" +
                     "<p><strong>Remark</strong> : " + RemarkMailString + "</p>";
 
+                // เรียกใช้ฟังชันส่งเมล
                 _emailSender.SendEmail(emailList, subject, emailBody);
 
             }
-            if (switchcase == 1)
+            if (switchcase == 1) //กรณีที่ Edit Work
             {
-                var subjectU = "AgileRap Work has Update!!";
-                //****************************************************************************************//
-                var workLog = db.WorkLog.Where(d => d.WorkID == work.ID)
+                string subjectU = "AgileRap Work has Update!!"; //หัวข้ออีเมล
+
+                //!------ เทียบประวัติการแก้ไข -------//
+                List<WorkLog> workLog = db.WorkLog.Where(d => d.WorkID == work.ID)
                         .Include(i => i.Status)
                         .Include(o => o.ProviderLog).ThenInclude(oi => oi.User)
                         .ToList();
 
-
+                // -- ดึงประวัติการแก้ไข 2 ตัวล่าสุดออกมา
                 ICollection<WorkLog> items = workLog;
 
                 IEnumerable<WorkLog> lastTwoItems = items.TakeLast(2);
 
-                var LastTwoWorkLog = lastTwoItems.ToList();
-                
+                List<WorkLog> LastTwoWorkLog = lastTwoItems.ToList();
+                // -- สิ้นสุดดึงประวัติการแก้ไข 2 ตัวล่าสุดออกมา
+
                 int i = 0;
 
-
+                // เนื้อหาอีเมล
                 string emailBodyU = "<h3>This is a new update for your work.</h3>";
 
-                var Updater1 = db.User.Where(m => m.ID == LastTwoWorkLog[i + 1].UpdateBy).FirstOrDefault();
+                // แสดงชื่อผู้แก้ไข พร้อมเวลาที่แก้ไข
+                User Updater1 = db.User.Where(m => m.ID == LastTwoWorkLog[i + 1].UpdateBy).FirstOrDefault();
                 emailBodyU += "<p><strong>Update by</strong> : " + Updater1.Name + "  <strong>on</strong> " + LastTwoWorkLog[i + 1].UpdateDate.Value.ToString("dd/MM/yyyy hh:mm tt") + "</p><br />";
 
-                if (LastTwoWorkLog[i].Project != LastTwoWorkLog[i + 1].Project)
+                if (LastTwoWorkLog[i].Project != LastTwoWorkLog[i + 1].Project)// กรณีที่ Project ไม่ตรงกัน
                 {
                     emailBodyU += "<p><strong>Project</strong> : " + LastTwoWorkLog[i].Project + " -> " + LastTwoWorkLog[i + 1].Project + "</p>";
                 }
-                if (LastTwoWorkLog[i].Name != LastTwoWorkLog[i + 1].Name)
+                if (LastTwoWorkLog[i].Name != LastTwoWorkLog[i + 1].Name)// กรณีที่ Name ไม่ตรงกัน
                 {
                     emailBodyU += "<p><strong>Name</strong> : " + LastTwoWorkLog[i].Name + " -> " + LastTwoWorkLog[i + 1].Name + "</p>";
                 }
-                if (LastTwoWorkLog[i].DueDate != LastTwoWorkLog[i + 1].DueDate)
+                if (LastTwoWorkLog[i].DueDate != LastTwoWorkLog[i + 1].DueDate)// กรณีที่ DueDate ไม่ตรงกัน
                 {
-                    if (LastTwoWorkLog[i].DueDate != null)
+                    if (LastTwoWorkLog[i].DueDate != null) //กรณี workLog ตัวแรก มีค่า
                     {
                         DateTime specifiedDate = (DateTime)LastTwoWorkLog[i].DueDate;
                         string formattedDate = specifiedDate.ToString("dd/MMM/yyyy");
-                        if (LastTwoWorkLog[i + 1].DueDate != null)
+
+                        if (LastTwoWorkLog[i + 1].DueDate != null)//กรณี workLog ตัวสุดท้าย มีค่า
                         {
                             DateTime specifiedDate2 = (DateTime)LastTwoWorkLog[i + 1].DueDate;
                             string formattedDate2 = specifiedDate2.ToString("dd/MMM/yyyy");
                             emailBodyU += "<p><strong>Due date</strong> : " + formattedDate + " -> " + formattedDate2 + "</p>";
                         }
-                        else
+                        else//กรณี workLog ตัวสุดท้าย ไม่มีค่า
                         {
                             string formattedDate2 = " N/A ";
                             emailBodyU += "<p><strong>Due date</strong> : " + formattedDate + " -> " + formattedDate2 + "</p>";
                         }
                     }
-                    else
+                    else //กรณี workLog ตัวแรก ไม่มีค่า
                     {
                         string formattedDate = " N/A ";
-                        if (LastTwoWorkLog[i + 1].DueDate != null)
+                        if (LastTwoWorkLog[i + 1].DueDate != null)//กรณี workLog ตัวสุดท้าย มีค่า
                         {
                             DateTime specifiedDate2 = (DateTime)LastTwoWorkLog[i + 1].DueDate;
                             string formattedDate2 = specifiedDate2.ToString("dd/MM/yyyy");
                             emailBodyU += "<p><strong>Due date</strong> : " + formattedDate + " -> " + formattedDate2 + "</p>";
                         }
-                        else
+                        else//กรณี workLog ตัวสุดท้าย ไม่มีค่า(ป้องกันระเบิด)
                         {
                             string formattedDate2 = " N/A ";
                             emailBodyU += "<p><strong>Due date</strong> : " + formattedDate + " -> " + formattedDate2 + "</p>";
@@ -1067,12 +783,11 @@ namespace AgileRap_Process2.Controllers
                     }
 
                 }
-                if (LastTwoWorkLog[i].StatusID != LastTwoWorkLog[i + 1].StatusID)
+                if (LastTwoWorkLog[i].StatusID != LastTwoWorkLog[i + 1].StatusID) // กรณีที่ StatusID ไม่ตรงกัน
                 {
                     emailBodyU += "<p><strong>Status</strong> : " + LastTwoWorkLog[i].Status.StatusName + " -> " + LastTwoWorkLog[i + 1].Status.StatusName + "</p>";
-                    //emailBodyU += "<p><strong>Status</strong> : " + statusdb.Where(s => s.ID == LastTwoWorkLog[i].StatusID).First().StatusName  + " -> " + statusdb.Where(s => s.ID == LastTwoWorkLog[i + 1].StatusID).First().StatusName + "</p><br />";
                 }
-                if (LastTwoWorkLog[i].Remark != LastTwoWorkLog[i + 1].Remark)
+                if (LastTwoWorkLog[i].Remark != LastTwoWorkLog[i + 1].Remark) // กรณีที่ Remark ไม่ตรงกัน
                 {
                     emailBodyU += "<p><strong>Remark</strong> : " + LastTwoWorkLog[i].Remark + " -> " + LastTwoWorkLog[i + 1].Remark + "</p>";
                 }
@@ -1086,7 +801,7 @@ namespace AgileRap_Process2.Controllers
                 string temppro1 = "";
                 string temppro2 = "";
 
-                foreach (var tp1 in LastTwoWorkLog[i].ProviderLog)
+                foreach (ProviderLog tp1 in LastTwoWorkLog[i].ProviderLog)
                 {
                     temppro1 += tp1.User.Name;
 
@@ -1099,7 +814,7 @@ namespace AgileRap_Process2.Controllers
 
                 }
 
-                foreach (var tp2 in LastTwoWorkLog[i + 1].ProviderLog)
+                foreach (ProviderLog tp2 in LastTwoWorkLog[i + 1].ProviderLog)
                 {
                     temppro2 += tp2.User.Name;
 
@@ -1112,18 +827,112 @@ namespace AgileRap_Process2.Controllers
 
                 }
 
-                if (temppro1 != temppro2)
+                if (temppro1 != temppro2) // กรณีที่ Provider ไม่ตรงกัน
                 {
                     string pro1 = temppro1;
                     string pro2 = temppro2;
                     emailBodyU += "<p><strong>Provider</strong> : " + pro1 + " -> " + pro2 + "</p>";
                 }
-                //****************************************************************************************//
 
+                //!------ สิ้นสุดการเทียบประวัติการแก้ไข -------//
+
+                // เรียกใช้ฟังชันส่งเมล
                 _emailSender.SendEmail(emailList, subjectU, emailBodyU);
 
             }
+        }
 
+        private List<Work> FilterListWork(List<Work> works, string? RequseterFilter, string? ProviderFilterValue, string? ProjectFilter, string? StatusFilter, bool? IsChangePage, int? id)
+        {
+            if (IsChangePage == null && RequseterFilter == null) { HttpContext.Session.Remove("RequseterFilter"); }
+            if (IsChangePage == null && ProviderFilterValue == null) { HttpContext.Session.Remove("ProviderFilterValue"); }
+            if (IsChangePage == null && ProjectFilter == null) { HttpContext.Session.Remove("ProjectFilter"); }
+            if (IsChangePage == null && StatusFilter == null) { HttpContext.Session.Remove("StatusFilter"); }
+
+            if (RequseterFilter != null)
+            {
+                //works = works.Where(m => m.CreateBy == int.Parse(RequseterFilter)).ToList();
+                works = works.Where(m => m.ID == id || m.CreateBy == int.Parse(RequseterFilter)).ToList();
+                HttpContext.Session.SetString("RequseterFilter", RequseterFilter);
+            }
+            if (ProjectFilter != null)
+            {
+                //works = works.Where(m => m.Project == ProjectFilter).ToList();
+                works = works.Where(m => m.ID == id || m.Project == ProjectFilter).ToList();
+                HttpContext.Session.SetString("ProjectFilter", ProjectFilter);
+            }
+            if (StatusFilter != null)
+            {
+                //works = works.Where(m => m.StatusID == int.Parse(StatusFilter)).ToList();
+                works = works.Where(m => m.ID == id || m.StatusID == int.Parse(StatusFilter)).ToList();
+                HttpContext.Session.SetString("StatusFilter", StatusFilter);
+            }
+            if (ProviderFilterValue != null)
+            {
+                string[] ListStringsProvider = ProviderFilterValue.Split(',');
+                foreach (Work work in works)
+                {
+                    if (work.Provider.Where(p => ListStringsProvider.Contains(p.UserID.ToString()) == true && p.IsDelete != true).Count() > 0)
+                    {
+                        work.ProvidersFilterIsFound = true;
+                    }
+                }
+                //works = works.Where(m => m.ProvidersFilterIsFound == true).ToList();
+                works = works.Where(m => m.ID == id || m.ProvidersFilterIsFound == true).ToList();
+                HttpContext.Session.SetString("ProviderFilterValue", ProviderFilterValue);
+            }
+
+            return works;
+        }
+
+        private void ChangeMode(string? changeMode)
+        {
+            if (changeMode == "Operator")
+            {
+                HttpContext.Session.SetString("Default", "Operator");
+                HttpContext.Session.Remove("RequseterFilter");
+                HttpContext.Session.Remove("ProjectFilter");
+                HttpContext.Session.Remove("StatusFilter");
+            }
+            else if (changeMode == "Controller")
+            {
+                HttpContext.Session.SetString("Default", "Controller");
+                HttpContext.Session.Remove("ProviderFilterValue");
+                HttpContext.Session.Remove("ProjectFilter");
+                HttpContext.Session.Remove("StatusFilter");
+            }
+        }
+
+        private void SelectProviderFilter(string? ProviderFilterValue)
+        {
+            if (ProviderFilterValue != null)
+            {
+                string[] ListStringsProvider = ProviderFilterValue.Split(',');
+                List<SelectListItem> UserList = db.User
+                                                .Select(u => new SelectListItem
+                                                {
+                                                    Value = u.ID.ToString(),
+                                                    Text = u.Name
+                                                }).ToList();
+                //_FilterProvider = UserList;
+                foreach (string i in ListStringsProvider)
+                {
+                    foreach (SelectListItem j in UserList)
+                    {
+                        if (i == j.Value)
+                        {
+                            j.Selected = true;
+                            break;
+                        }
+                    }
+                }
+                _FilterProvider = UserList;
+            }
+            else
+            {
+                List<SelectListItem> UserList = db.User.Select(u => new SelectListItem { Value = u.ID.ToString(), Text = u.Name }).ToList();
+                _FilterProvider = UserList;
+            }
         }
 
     }

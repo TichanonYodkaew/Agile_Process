@@ -1,8 +1,6 @@
 ﻿@model AgileRap_Process2.Models.User
 
-
-
-<h1>Register</h1>
+@* <h1>Register</h1>
 
 @using (Html.BeginForm("Register", "Logins", FormMethod.Post, new { id = "Registerform" }))
 {
@@ -13,7 +11,6 @@
 
             <div class="form-group">
                 <label style="color:red;">*</label><label class="control-label"> อีเมล : </label>
-                @* @Html.EditorFor(m => m.Email, new { htmlAttributes = new { @class = "form-control" } }) *@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
                 <p style="color:red;"> @ViewBag.EmailWarning </p>
@@ -22,7 +19,6 @@
             <br />
             <div class="form-group">
                 <label style="color:red;">*</label><label class="control-label"> รหัสผ่าน : </label>
-                @* @Html.EditorFor(m => m.Password, new { htmlAttributes = new { @class = "form-control" } }) *@
                 <input asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
                 <p style="color:red;"> @ViewBag.PasswordWarning </p>
@@ -31,7 +27,6 @@
             <br />
             <div class="form-group">
                 <label style="color:red;">*</label><label class="control-label"> ยืนยันรหัสผ่าน : </label>
-                @* @Html.EditorFor(m => m.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } }) *@
                 <input asp-for="ConfirmPassword" class="form-control" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 <p style="color:red;"> @ViewBag.PasswordWarning </p>
@@ -40,13 +35,9 @@
             <br />
             <div class="form-group">
                 <label style="color:red;">*</label><label class="control-label"> ชื่อเล่น : </label>
-                @* @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @class = "form-control" } }) *@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-
-            
-            
 
             <br />
             <div class="form-group">
@@ -59,5 +50,38 @@
 <br />
 <div>
     <a asp-action="Login" asp-controller="Logins" class="btn btn-outline-secondary">Back to Login</a>
-</div>
+</div> *@
+<head>
+    <link rel="stylesheet" href="~/css/TestCSS101.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="registration form">
+            <header class="topics">Register</header>
+            <form asp-action="Register" asp-controller="Logins" id="Registerform">
+                <p style="color:red;"> @ViewBag.InputWarning </p>
 
+                <input asp-for="Email" placeholder="Email">
+                <p style="color:red;"> @ViewBag.EmailWarning </p>
+
+                <input asp-for="Password" placeholder="Password">
+                <p style="color:red;"> @ViewBag.PasswordWarning </p>
+
+                <input asp-for="ConfirmPassword" placeholder="Confirm Password">
+                <p style="color:red;"> @ViewBag.PasswordWarning </p>
+
+                <input asp-for="Name" placeholder="Name" />
+
+                <input type="submit" class="button" value="Register">
+            </form>
+            <div class="register">
+                <span class="register">
+                    Already have an account?
+                    <label>
+                        <a asp-action="Login" asp-controller="Logins">Login</a>
+                    </label>
+                </span>
+            </div>
+        </div>
+    </div>
+</body>

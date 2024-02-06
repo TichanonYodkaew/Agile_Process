@@ -4,9 +4,13 @@
     ViewData["Title"] = "Index";
     List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
     List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
-
+    List<SelectListItem> ProjectDropdownList = ViewBag.ProjectDropdownList;
+    string Role = Context.Session.GetString("Default");
     // Work work = new Work();
 }
+
+
+
 @if (TempData["AlertMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -14,70 +18,86 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
-<h1>รายการงาน</h1>
+@using (Html.BeginForm("Index", "Works", FormMethod.Get, new { id = "filterform" }))
+{
 
-<table class="table-bordered" style="width:1400px;">
-    <thead style="text-align: center; vertical-align: middle;">
-        <tr>
-            <th style="width:8%">
-                @Html.DisplayName("Created Date")
-            </th>
-            <th style="width:10%">
-                @Html.DisplayName("Project")
-            </th>
-            <th style="width:10%">
-                @Html.DisplayName("Name")
-            </th>
-            <th style="width:12%">
-                @Html.DisplayName("Due Date")
-            </th>
-            <th style="width:8%">
-                @Html.DisplayName("Assign By")
-                <br />
-                @Html.DisplayName("/ Requester")
-            </th>
-            <th style="width:20%">
-                @Html.DisplayName("Assign To")
-                <br />
-                @Html.DisplayName("/ Provider")
-            </th>
-            <th style="width:9%">
-                @Html.DisplayName("Status")
-            </th>
-            <th style="width:7%">
-                @Html.DisplayName("Remark")
-            </th>
-            <th>
-                @Html.DisplayName("Manage")
-            </th>
-        </tr>
-    </thead>
-    <tbody style="text-align: center; vertical-align: middle;">
-        @foreach (Work work in Model)
-        {
-            if (work.RedFlag != true)
+    <h1>รายการงาน @Role</h1>
+
+    @Html.Editor(null, "FilterWork")
+
+    <table class="table-bordered" style="width:1400px;">
+        <thead style="text-align: center; vertical-align: middle;">
+            <tr>
+                <th style="width:8%">
+                    @Html.DisplayName("Created Date")
+                </th>
+                <th style="width:10%">
+                    @Html.DisplayName("Project")
+                </th>
+                <th style="width:10%">
+                    @Html.DisplayName("Name")
+                </th>
+                <th style="width:12%">
+                    @Html.DisplayName("Due Date")
+                </th>
+                <th style="width:8%">
+                    @Html.DisplayName("Assign By")
+                    <br />
+                    @Html.DisplayName("/ Requester")
+                </th>
+                <th style="width:20%">
+                    @Html.DisplayName("Assign To")
+                    <br />
+                    @Html.DisplayName("/ Provider")
+                </th>
+                <th style="width:9%">
+                    @Html.DisplayName("Status")
+                </th>
+                <th style="width:7%">
+                    @Html.DisplayName("Remark")
+                </th>
+                <th>
+                    @Html.DisplayName("Manage")
+                </th>
+            </tr>
+        </thead>
+        <tbody style="text-align: center; vertical-align: middle;">
+            @foreach (Work work in Model)
             {
-                @Html.DisplayFor(m => work)
+                if (work.RedFlag != true)
+                {
+                    @Html.DisplayFor(m => work)
+                }
+                else
+                {
+                    @Html.DisplayFor(m => work, "WorkRedNotic")
+                }
             }
-            else
-            {
-                @Html.DisplayFor(m => work, "WorkRedNotic")
-            }
-        }
-        <tr style="border: 1px solid white;">
-            <td class="text-center">
-                <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+            <tr style="border: 1px solid white;">
+                <td class="text-center">
+                   @*  <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
+                    @Html.ActionLink("Create", "Create", "Works", new
+                        {
+                            RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                            ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                            ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                            StatusFilter = Context.Session.GetString("StatusFilter"),
+                            IsChangePage = true
+                        }, new { @class = "btn btn-primary" })
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+
 @* <div>
     <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
 </div>

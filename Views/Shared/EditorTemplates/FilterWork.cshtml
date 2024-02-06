@@ -1,0 +1,165 @@
+﻿@{
+    List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
+    List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+    List<SelectListItem> ProjectDropdownList = ViewBag.ProjectDropdownList;
+    List<SelectListItem> FilterProviderDropdownList = ViewBag.FilterProviderDropdownList;
+}
+
+@Html.Hidden("ChangeMode")
+<input type="hidden" id="ProviderFilterValue" name="ProviderFilterValue" />
+<input type="hidden" id="ProviderFilterAllSelected" name="ProviderFilterAllSelected" />
+
+<div class="row">
+    <div class="col">
+        <input type="button" id="OperatorButton" value="Operator" class="btn btn-outline-warning" onclick="FuncOperator()" />
+        <input type="button" id="ControllerButton" value="Controller" class="btn btn-outline-warning" onclick="FuncController()" />
+    </div>
+</div>
+
+<br />
+
+<div class="row">
+
+    <div class="col-auto">
+        <p>Assign By/ Requester :</p>
+    </div>
+    <div class="col-md-1">
+        <select id="RequseterFilter" name="RequseterFilter" class="form-control-customdropdown" asp-items="@(new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")))">
+            <option value="">Select requseter</option>
+        </select>
+       @*  @Html.DropDownList("RequseterFilter", new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")), "Select Requester", new { @class = "form-control-customdropdown" }) *@
+    </div>
+    <div class="col-auto">
+        <p>Assign to/ Provider :</p>
+    </div>
+    <div class="col-auto">
+        <select id="select-providerfilter-options" multiple="multiple" class="form-control" asp-items="FilterProviderDropdownList">
+        </select>
+    </div>
+    <div class="col-auto">
+        <p>Project :</p>
+    </div>
+    <div class="col-md-1">
+       @*  <select id="ProjectFilter" name="ProjectFilter" class="form-control-customdropdown" asp-items="ProjectDropdownList">
+            <option value="">Select project</option>
+        </select> *@
+        @Html.DropDownList("ProjectFilter", new SelectList(ProjectDropdownList, "Value", "Text", Context.Session.GetString("ProjectFilter")), "Select Project", new { @class = "form-control-customdropdown" })
+    </div>
+    <div class="col-auto">
+        <p>Status :</p>
+    </div>
+    <div class="col-md-1">
+        @* <select id="StatusFilter" name="StatusFilter" class="form-control-customdropdown" asp-items="StatusDropdownList">
+            <option value="">Select status</option>
+        </select> *@
+        @Html.DropDownList("StatusFilter", new SelectList(StatusDropdownList, "Value", "Text", Context.Session.GetString("StatusFilter")), "Select Status", new { @class = "form-control-customdropdown" })
+    </div>
+    <div class="col-md-1">
+        <input type="submit" value="Search" class="btn btn-outline-secondary"/>
+    </div>
+</div>
+<br />
+
+<script>
+    function FuncOperator() {
+        document.getElementById('OperatorButton').setAttribute('disabled', '');
+        document.getElementById('ControllerButton').removeAttribute('disabled');
+        document.getElementById('RequseterFilter').value = null;
+        document.getElementById('ProviderFilterValue').value = @GlobalVariable.GetUserID()
+        document.getElementById('ProjectFilter').value = null;
+        document.getElementById('StatusFilter').value = null;
+        document.getElementById('ChangeMode').value = "Operator";
+
+        $("#filterform").submit();
+    }
+    function FuncController() {
+        document.getElementById('OperatorButton').removeAttribute('disabled');
+        document.getElementById('ControllerButton').setAttribute('disabled', '');
+        document.getElementById('RequseterFilter').value = @GlobalVariable.GetUserID()
+        document.getElementById('ProviderFilterValue').value = null;
+        document.getElementById('ProjectFilter').value = null;
+        document.getElementById('StatusFilter').value = null;
+        document.getElementById('ChangeMode').value = "Controller";
+
+        $("#filterform").submit();
+    }
+</script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded",
+        () => {
+
+            if ("@Context.Session.GetString("Default")" == "Operator") {
+                document.getElementById('OperatorButton').setAttribute('disabled', '');
+                document.getElementById('ControllerButton').removeAttribute('disabled');
+            }
+            else {
+                document.getElementById('OperatorButton').removeAttribute('disabled');
+                document.getElementById('ControllerButton').setAttribute('disabled', '');
+            }
+
+            var toppings = $('#select-providerfilter-options option:selected');
+            var selected = [];
+            $(toppings).each(function (index, item) {
+                selected.push([$(this).val()]);
+            });
+            document.getElementById("ProviderFilterValue").value = selected.join(',');
+
+            $('#select-providerfilter-options').multiselect({
+                buttonClass: 'form-select',
+                nonSelectedText: 'Select Provider',
+                buttonContainer: '<div id="select-providerfilter-container"></div>',
+                selectedClass: 'active multiselect-selected',
+                numberDisplayed: 5,
+                buttonWidth: '18em',
+                includeSelectAllOption: true,
+                onSelectAll: function (options) {
+                    document.getElementById("ProviderFilterAllSelected").value = true;
+
+                    var toppings = $('#select-providerfilter-options option:selected');
+                    var selected = [];
+                    $(toppings).each(function (index, item) {
+                        selected.push([$(this).val()]);
+                    });
+
+                    document.getElementById("ProviderFilterValue").value = selected.join(',');
+                },
+                onDeselectAll: function (options) {
+                    document.getElementById("ProviderFilterAllSelected").value = false;
+                    document.getElementById("ProviderFilterValue").value = "";
+                },
+
+                //includeResetOption: true,
+                //selectAllName: 'select-all-name',
+                onChange: function (option, checked) {
+                    /*
+                     * Not there yet
+                     */
+                    if (checked) {
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[1].ariaChecked = "true";
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[0].ariaChecked = "true";
+                    } else {
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[1].ariaChecked = "false";
+                        document.querySelectorAll(`[value="${$(option[0])[0].value}"]`)[0].ariaChecked = "false";
+                    }
+
+                    //$("#select-tops-options").multiselect('deselect', '1');
+                    var toppings = $('#select-providerfilter-options option:selected');
+
+                    var selected = [];
+                    $(toppings).each(function (index, item) {
+                        selected.push([$(this).val()]);
+                    });
+                    document.getElementById("ProviderFilterAllSelected").value = false;
+
+                    document.getElementById("ProviderFilterValue").value = selected.join(',');
+                },
+                templates: {
+                    button:
+                        '<button type="button" class="multiselect dropdown-toggle" ' +
+                        'data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                    resetButton: '<div class="multiselect-reset text-center p-2"><button type="button" class="btn btn-sm btn-danger"></button></div>'
+                }
+            });
+        });
+</script>

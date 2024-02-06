@@ -22,6 +22,7 @@ namespace AgileRap_Process2.Models
             this.CreateDate = DateTime.Now;
             this.UpdateDate = DateTime.Now;
             this.IsDelete = false;
+
             dbContext.ProviderLog.Add(this);
         }
 
@@ -29,13 +30,13 @@ namespace AgileRap_Process2.Models
         {
             this.UpdateBy = GlobalVariable.GetUserID();
             this.UpdateDate = DateTime.Now;
-            var existingEntity = dbContext.ProviderLog.Find(this.ID);
+            ProviderLog existingEntity = dbContext.ProviderLog.Find(this.ID);
             dbContext.Entry(existingEntity).CurrentValues.SetValues(this);
         }
 
         public void Delete(AgileRap_Process2Context dbContext)
         {
-            var data = dbContext.ProviderLog.Find(this.ID);
+            ProviderLog data = dbContext.ProviderLog.Find(this.ID);
             data.UpdateBy = GlobalVariable.GetUserID();
             data.UpdateDate = DateTime.Now;
             data.IsDelete = true;

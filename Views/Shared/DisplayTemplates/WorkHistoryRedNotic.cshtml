@@ -68,7 +68,16 @@
                 <p>Name : @Html.DisplayFor(m => m.Name)</p>
             </div>
             <div style="float:right;">
-                <a class="btn btn-danger" asp-action="Index" asp-controller="Works">Close</a>
+                @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works">Close</a> *@
+                @Html.ActionLink("Close", "Index", "Works", new
+                    {
+                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                        StatusFilter = Context.Session.GetString("StatusFilter"),
+                        IsChangePage = true
+
+                    }, new { @class = "btn btn-danger" })
             </div>
             <div style="clear:both;"></div>
             <table class="table-bordered">

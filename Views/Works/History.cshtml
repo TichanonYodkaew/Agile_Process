@@ -6,6 +6,12 @@
 
 <h1>ประวัติการแก้ไขรายการงาน</h1>
 
+@using (Html.BeginForm("History", "Works", FormMethod.Get, new { id = "filterform" }))
+{
+    <input type="hidden" name="HistoryID" value="@HistoryID" />
+    @Html.Editor(null, "FilterWork")
+}
+
 <table style="width:1400px;">
     <thead  style="text-align: center; vertical-align: middle;">
         <tr>
@@ -71,7 +77,15 @@
         }
         <tr>
             <td class="text-center">
-                <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+                @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
+                @Html.ActionLink("Create", "Create", "Works", new
+                    {
+                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                        StatusFilter = Context.Session.GetString("StatusFilter"),
+                        IsChangePage = true
+                    }, new { @class = "btn btn-primary" })
             </td>
             <td></td>
             <td></td>
