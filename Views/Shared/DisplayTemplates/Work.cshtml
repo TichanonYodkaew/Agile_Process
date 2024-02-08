@@ -6,19 +6,19 @@
 }
 
 <tr>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.CreateDate)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Project)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Name)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.DueDate)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @foreach (var i in UserDropdownList)
         {
             if (Model.CreateBy == int.Parse(i.Value))
@@ -27,7 +27,7 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @{
             var ProviderCount = Model.Provider.Count(i => i.IsDelete == false);
             var counter = 0;
@@ -49,7 +49,7 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @foreach (var i in StatusDropdownList)
         {
             if (Model.StatusID == int.Parse(i.Value))
@@ -58,13 +58,13 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Remark)
     </td>
 
     @if (Model.HistoryPage != true)
     {
-        <td style="border: 1px solid black;">
+        <td>
             @Html.ActionLink("History", "History", "Works", new
                 {
                     HistoryID = Model.ID,
@@ -90,5 +90,9 @@
            @*  <a class="btn btn-primary" asp-action="History" asp-controller="Works" asp-route-id="@Model.ID">History</a>
             <a class="btn btn-warning" asp-action="Edit" asp-controller="Works" asp-route-id="@Model.ID">Edit</a> *@
         </td>
+    }
+    else
+    {
+        <td></td>
     }
 </tr>

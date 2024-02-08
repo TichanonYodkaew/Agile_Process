@@ -22,6 +22,11 @@ namespace AgileRap_Process2.Controllers
         // GET: LoginsController
         public ActionResult Login() //แสดงหน้า Login
         {
+
+            if (HttpContext.Session.GetString("UserEmailSession") != null)
+            {
+                return RedirectToAction("Index", "Works");
+            }
             User user = new User();
             return View(user);
         }
@@ -31,9 +36,10 @@ namespace AgileRap_Process2.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(User user) 
         {
+
             if (user.Email == null || user.Password == null) //กรณีกรอกข้อมูล Email และ Password ไม่ครบ
             {
-                ViewBag.Message = "กรอกข้อมูลไม่ครบ! กรุณากรอกข้อมูลให้ครบ";
+                ViewBag.Message = "กรอกข้อมูลไม่ครบ!";
             }
             else //กรณีกรอกข้อมูล Email และ Password ไครบ
             {

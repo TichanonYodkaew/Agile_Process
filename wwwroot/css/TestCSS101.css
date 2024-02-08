@@ -6,8 +6,13 @@
 
 body {
     width: 100%;
-    background-color: #328f8a;
-    background-image: linear-gradient(45deg,#328f8a,#08ac4b);
+    /*background-color: #328f8a;
+    background-image: linear-gradient(45deg,#328f8a,#08ac4b);*/
+    /*background-image: linear-gradient(to right, #d3cce3, #e9e4f0);*/ /* Feather style */
+    /*background-color: #74EBD5;
+    background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);*/
+    background-color: #b6fbff;
+    background-image: linear-gradient(to bottom, #b6fbff, #83a4d4);
 }
 
 .container {
@@ -21,9 +26,9 @@ body {
     box-shadow: 0 5px 10px rgba(0,0,0,0.3);
 }
 
-.container .form {
-    padding: 2rem;
-}
+    .container .form {
+        padding: 2rem;
+    }
 
 .topics {
     font-size: 2rem;
@@ -49,7 +54,7 @@ body {
 
 .form a {
     font-size: 16px;
-    color: #009579;
+    color: #6666cc;
     text-decoration: none;
 }
 
@@ -59,7 +64,12 @@ body {
 
 .form input.button {
     color: #fff;
-    background: #328f8a;
+    /*    background-color: #328f8a;
+    background-image: linear-gradient(45deg,#328f8a,#08ac4b);*/
+    /*background-color: #9FACE6;
+    background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);*/
+    background-color: #b6fbff;
+    background-image: linear-gradient(to left, #b6fbff, #83a4d4);
     font-size: 1.2rem;
     font-weight: 500;
     letter-spacing: 1px;
@@ -69,7 +79,8 @@ body {
 }
 
     .form input.button:hover {
-        background: #006653;
+        /*background: #74EBD5;*/
+        background: #83a4d4;
     }
 
 .register {
@@ -78,7 +89,7 @@ body {
 }
 
     .register label {
-        color: #009579;
+        color: #333399;
         cursor: pointer;
     }
 

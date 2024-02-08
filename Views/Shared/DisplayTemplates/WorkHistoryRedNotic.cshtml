@@ -7,19 +7,19 @@
 }
 
 <tr style="background-color: Tomato;">
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.CreateDate)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Project)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Name)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.DueDate)
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @foreach (var i in UserDropdownList)
         {
             if (Model.CreateBy == int.Parse(i.Value))
@@ -28,7 +28,7 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @{
             var ProviderCount = Model.Provider.Count(i => i.IsDelete == false);
             var counter = 0;
@@ -50,7 +50,7 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @foreach (var i in StatusDropdownList)
         {
             if (Model.StatusID == int.Parse(i.Value))
@@ -59,14 +59,12 @@
             }
         }
     </td>
-    <td style="border: 1px solid black;">
+    <td>
         @Html.DisplayFor(m => m.Remark)
     </td>
-    <td rowspan="@totalcount" style="background-color: white; border: 1px solid black; border-top:1px solid black;">
+    <td @* rowspan="@totalcount" *@ style="background-color: white;">
         <div>
-            <div style="float:left; margin-right:10px;">
-                <p>Name : @Html.DisplayFor(m => m.Name)</p>
-            </div>
+            
             <div style="float:right;">
                 @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works">Close</a> *@
                 @Html.ActionLink("Close", "Index", "Works", new
@@ -78,6 +76,10 @@
                         IsChangePage = true
 
                     }, new { @class = "btn btn-danger" })
+            </div>
+            <br />
+            <div style="float:left;">
+                <p>Name : @Html.DisplayFor(m => m.Name)</p>
             </div>
             <div style="clear:both;"></div>
             <table class="table-bordered">

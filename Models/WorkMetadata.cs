@@ -109,19 +109,23 @@ namespace AgileRap_Process2.Models
             }
             else //! กรณีเลือก Provider บางส่วน
             {
-                int[] listprovider = Array.ConvertAll(this.ProviderValue.Split(','), int.Parse);
-                // เพิ่ม User ตามที่เลือก ลง Provider
-                foreach (var i in listprovider)
+                if (this.ProviderValue != null)
                 {
-                    Provider provider = new Provider();
-                    provider.UserID = i;
-                    provider.Insert(dbContext);
-                    this.Provider.Add(provider);
+                    int[] listprovider = Array.ConvertAll(this.ProviderValue.Split(','), int.Parse);
+                    // เพิ่ม User ตามที่เลือก ลง Provider
+                    foreach (var i in listprovider)
+                    {
+                        Provider provider = new Provider();
+                        provider.UserID = i;
+                        provider.Insert(dbContext);
+                        this.Provider.Add(provider);
 
-                    ProviderLog providerLog = new ProviderLog();
-                    providerLog.UserID = i;
-                    providerLog.Insert(dbContext);
-                    workLog.ProviderLog.Add(providerLog);
+                        ProviderLog providerLog = new ProviderLog();
+                        providerLog.UserID = i;
+                        providerLog.Insert(dbContext);
+                        workLog.ProviderLog.Add(providerLog);
+                    }
+
                 }
             }
             this.WorkLogs.Add(workLog);

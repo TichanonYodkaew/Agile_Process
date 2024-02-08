@@ -48,17 +48,25 @@ header a img {
         font-family: "Roboto", sans-serif;
         text-transform: uppercase;
         outline: 0;
-        background-color: #328f8a;
-        background-image: linear-gradient(45deg,#328f8a,#08ac4b);
+        /*background-color: #328f8a;
+        background-image: linear-gradient(45deg,#328f8a,#08ac4b);*/
+        /* background-color: #9FACE6;
+        background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);*/
+        background-color: #b6fbff;
+        background-image: linear-gradient(to left, #b6fbff, #83a4d4);
         width: 100%;
         border: 0;
         padding: 15px;
-        color: #FFFFFF;
+        color: #fff;
         font-size: 14px;
-        -webkit-transition: all 0.3 ease;
-        transition: all 0.3 ease;
+        /*-webkit-transition: all 0.3 ease;*/
+        transition: 0.4s;
         cursor: pointer;
     }
+        .form button:hover {
+            /*background: #74EBD5;*/
+            background: #83a4d4;
+        }
 
     .form .message {
         margin: 15px 0 0;
@@ -67,9 +75,14 @@ header a img {
     }
 
         .form .message a {
-            color: #4CAF50;
+            /*color: #4CAF50;*/
+            color: #6666cc;
             text-decoration: none;
         }
+
+            .form .message a:hover {
+                text-decoration: underline;
+            }
 
 .container {
     position: relative;
@@ -79,8 +92,12 @@ header a img {
 }
 
 body {
-    background-color: #328f8a;
-    background-image: linear-gradient(45deg,#328f8a,#08ac4b);
+    /*background-color: #328f8a;
+    background-image: linear-gradient(45deg,#328f8a,#08ac4b);*/
+    /*    background-color: #74EBD5;
+    background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);*/
+    background-color: #b6fbff;
+    background-image: linear-gradient(to bottom, #b6fbff, #83a4d4);
     font-family: "Roboto", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

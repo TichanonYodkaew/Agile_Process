@@ -19,22 +19,22 @@
 
 
     <tr>
-        <td style="border: 1px solid black;">
+        <td>
             @Html.DisplayFor(m => m.CreateDate)
         </td>
-        <td style="border: 1px solid black;">
+        <td>
             @Html.EditorFor(m => m.Project, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
         </td>
-        <td style="border: 1px solid black;">
+        <td>
             @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @required = "required", @class = "form-control" } })
         </td>
 
-        <td style="border: 1px solid black;">
+        <td>
             @Html.EditorFor(m => m.DueDate, new { htmlAttributes = new { @class = "form-control", onchange = "IsChangeDuedate()", @id = "DueDateID" } })
         </td>
 
 
-        <td style="border: 1px solid black;">
+        <td>
             @* @Html.DropDownListFor(m => m.CreateBy, UserDropdownList) *@
             @foreach (var i in UserDropdownList)
             {
@@ -44,9 +44,9 @@
                 }
             }
         </td>
-        <td style="border: 1px solid black;" align="center">
+        <td align="center">
             <div>
-                <select id="select-tops-options" required multiple="multiple">
+                <select id="select-tops-options" required multiple="multiple" @* asp-items="UserDropdownList" *@>
                     @{
                         foreach (var providerdata in UserDropdownList)
                         {
@@ -55,17 +55,19 @@
                     }
                 </select>
             </div>
+            <div id="validation-message" style="color: red; display: none;">Please select at least one provider</div>
+
         </td>
-        <td style="border: 1px solid black;">
+        <td>
             @* @Html.DropDownListFor(m => m.StatusID, StatusDropdownList) *@
             <select id="StatusID" class="form-control" asp-for="StatusID" asp-items="StatusDropdownList" disabled></select>
         </td>
 
 
-        <td style="border: 1px solid black;">
+        <td>
             @Html.EditorFor(m => m.Remark, new { htmlAttributes = new { @class = "form-control" } })
         </td>
-        <td style="border: 1px solid black;">
+        <td>
             <input value="Submit" class="btn btn-success" type="submit" />
             @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a> *@
             @Html.ActionLink("Cancel", "Index", "Works", new
@@ -96,7 +98,6 @@
                 includeSelectAllOption: true,
                 onSelectAll: function (options) {
                     document.getElementById("areAllSelected").value = true;
-                    document.getElementById("ProviderValue").value = "";
                 },
                 onDeselectAll: function (options) {
                     document.getElementById("areAllSelected").value = false;
@@ -132,6 +133,49 @@
                         '<button type="button" class="multiselect dropdown-toggle" ' +
                         'data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
                     resetButton: '<div class="multiselect-reset text-center p-2"><button type="button" class="btn btn-sm btn-danger"></button></div>'
+                }
+            });
+
+            // $('#Workform').submit(function () {
+            //     if ($('#ProviderValue').val() === "") {
+            //         alert('Please select at least one provider');
+            //         return false;
+            //     }
+            // });
+
+            // $('#Workform').submit(function () {
+            //     var selectedOptions = $('#select-tops-options option:selected');
+
+            //     if (selectedOptions.length === 0) {
+            //         alert('Please select at least one provider');
+            //         return false; // ป้องกันแบบฟอร์มไม่ให้ส่ง
+            //     }
+            // });
+
+            // ตรวจสอบการกรอกข้อมูลเมื่อยังไม่ได้เลือก
+            // $('#Workform').submit(function (event) {
+            //     var selectedOptions = $('#select-tops-options option:selected');
+
+            //     if (selectedOptions.length === 0) {
+            //         event.preventDefault(); // ป้องกันแบบฟอร์มไม่ให้ส่ง
+            //         displayErrorMessage('Please select at least one provider');
+            //     }
+            // });
+
+            // function displayErrorMessage(message) {
+            //     var errorMessageContainer = $('#error-message-container');
+            //     errorMessageContainer.text(message);
+            //     errorMessageContainer.show(); // แสดงข้อความแจ้งเตือน
+            // }
+
+            $('#Workform').submit(function () {
+                var selectedOptions = $('#select-tops-options option:selected');
+
+                if (selectedOptions.length === 0) {
+                    $('#validation-message').show();
+                    return false; // ป้องกันแบบฟอร์มไม่ให้ส่ง
+                } else {
+                    $('#validation-message').hide();
                 }
             });
 

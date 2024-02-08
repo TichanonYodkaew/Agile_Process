@@ -11,8 +11,8 @@
 
 <div class="row">
     <div class="col">
-        <input type="button" id="OperatorButton" value="Operator" class="btn btn-outline-warning" onclick="FuncOperator()" />
-        <input type="button" id="ControllerButton" value="Controller" class="btn btn-outline-warning" onclick="FuncController()" />
+        <input type="button" id="OperatorButton" value="Operator" class="btn btn-warning" onclick="FuncOperator()" />
+        <input type="button" id="ControllerButton" value="Controller" class="btn btn-warning" onclick="FuncController()" />
     </div>
 </div>
 
@@ -24,10 +24,10 @@
         <p>Assign By/ Requester :</p>
     </div>
     <div class="col-md-1">
-        <select id="RequseterFilter" name="RequseterFilter" class="form-control-customdropdown" asp-items="@(new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")))">
+        @* <select id="RequseterFilter" name="RequseterFilter" class="form-control-customdropdown" asp-items="@(new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")))">
             <option value="">Select requseter</option>
-        </select>
-       @*  @Html.DropDownList("RequseterFilter", new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")), "Select Requester", new { @class = "form-control-customdropdown" }) *@
+        </select> *@
+        @Html.DropDownList("RequseterFilter", new SelectList(UserDropdownList, "Value", "Text", Context.Session.GetString("RequseterFilter")), "Select Requester", new { @class = "form-control-customdropdown" })
     </div>
     <div class="col-auto">
         <p>Assign to/ Provider :</p>

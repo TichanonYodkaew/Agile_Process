@@ -4,16 +4,17 @@
     ViewData["Title"] = "Create";
     List<SelectListItem> UserDropdownList = ViewBag.UserDropdown;
     List<SelectListItem> StatusDropdownList = ViewBag.StatusDropdown;
+    string Role = Context.Session.GetString("Default");
 }
 
-<h1>สร้างรายการงาน</h1>
+<h1>สร้างรายการงาน (@Role)</h1>
 
 @using (Html.BeginForm("Create", "Works", FormMethod.Get, new { id = "filterform" }))
 {
     @Html.Editor(null, "FilterWork")
 }
-<table class="table-bordered" style="width:1400px;">
-    <thead style="text-align: center; vertical-align: middle;">
+<table class="table table-bordered bg-white border-dark" style="width:1400px;">
+    <thead class="table-dark" style="text-align: center; vertical-align: middle;">
         <tr>
             <th style="width:8%">
                 @Html.DisplayName("Created Date")
@@ -68,16 +69,25 @@
                 @Html.EditorFor(m => work)
             }
         }
-        <tr style="border: 1px solid white;">
-            <td class="text-center">
-                <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a>
+        <tr>
+            <td class="text-center" style="border-right: 1px solid white ;">
+                @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
+                @Html.ActionLink("Create task", "Create", "Works", new
+                    {
+                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                        StatusFilter = Context.Session.GetString("StatusFilter"),
+                        IsChangePage = true
+                    }, new { @class = "btn btn-primary" })
             </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
             <td></td>
         </tr>
         @* @{

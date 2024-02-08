@@ -21,12 +21,12 @@
 @using (Html.BeginForm("Index", "Works", FormMethod.Get, new { id = "filterform" }))
 {
 
-    <h1>รายการงาน @Role</h1>
+    <h1>รายการงาน (@Role)</h1>
 
     @Html.Editor(null, "FilterWork")
 
-    <table class="table-bordered" style="width:1400px;">
-        <thead style="text-align: center; vertical-align: middle;">
+    <table class="table table-bordered bg-white border-dark" style="width:1400px;">
+        <thead class="table-dark" style="text-align: center; vertical-align: middle;">
             <tr>
                 <th style="width:8%">
                     @Html.DisplayName("Created Date")
@@ -73,10 +73,10 @@
                     @Html.DisplayFor(m => work, "WorkRedNotic")
                 }
             }
-            <tr style="border: 1px solid white;">
-                <td class="text-center">
-                   @*  <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
-                    @Html.ActionLink("Create", "Create", "Works", new
+            <tr>
+                <td class="text-center" style="border-right: 1px solid white ;">
+                    @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
+                    @Html.ActionLink("Create task", "Create", "Works", new
                         {
                             RequseterFilter = Context.Session.GetString("RequseterFilter"),
                             ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
@@ -85,12 +85,13 @@
                             IsChangePage = true
                         }, new { @class = "btn btn-primary" })
                 </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
+                <td style="border-right: 1px solid white ;"></td>
                 <td></td>
             </tr>
         </tbody>

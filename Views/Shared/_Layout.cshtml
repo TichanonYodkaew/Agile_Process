@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-multiselect.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/UniversalCss.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/FooterCSS.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="~/AgileRap_Process2.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
+    <header class="fixed-top">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AgileRap_Process2</a>
@@ -21,7 +23,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         @* <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li> *@
                         <li class="nav-item">
                             @* <a class="nav-link text-dark" asp-area="" asp-controller="Works" asp-action="Index">Works</a> *@
@@ -82,12 +84,18 @@
         </main>
     </div>
 
-@*     <footer class="border-top footer text-muted bg-white">
-        <div class="container">
-            &copy; 2024 - AgileRap_Process2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    @*     <footer class="border-top footer text-muted bg-white">
+    <div class="container">
+    &copy; 2024 - AgileRap_Process2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
+    </footer>   *@
+
+    @await Html.PartialAsync("_Footer")
+@*     <footer class="fixed-bottom">
+        <div class="text-center p-3 bg-white">
+            &copy; @DateTime.Now.Year - AgileRap_Process2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer>   *@ 
-    <footer></footer>
+    </footer> *@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap-multiselect.min.js"></script>

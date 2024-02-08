@@ -890,14 +890,14 @@ namespace AgileRap_Process2.Controllers
             if (changeMode == "Operator")
             {
                 HttpContext.Session.SetString("Default", "Operator");
-                HttpContext.Session.Remove("RequseterFilter");
+                HttpContext.Session.Remove("RequseterFilter"); // ค่าเริ่มต้นของ Assign by หรือ Controller
                 HttpContext.Session.Remove("ProjectFilter");
                 HttpContext.Session.Remove("StatusFilter");
             }
             else if (changeMode == "Controller")
             {
                 HttpContext.Session.SetString("Default", "Controller");
-                HttpContext.Session.Remove("ProviderFilterValue");
+                HttpContext.Session.Remove("ProviderFilterValue"); // ค่าเริ่มต้นของ Provider หรือ Operator
                 HttpContext.Session.Remove("ProjectFilter");
                 HttpContext.Session.Remove("StatusFilter");
             }

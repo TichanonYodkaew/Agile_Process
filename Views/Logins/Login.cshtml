@@ -52,20 +52,20 @@
 
 <html>
 <head>
-    <link rel="stylesheet" href="~/css/style101.css" />
+    <link rel="stylesheet" href="~/css/TestTemplateCss1.css" asp-append-version="true" />
 </head>
 <body>
-
     <div class="login-page">
         <div class="form">
             <div class="login">
                 <div class="login-header">
-                    <h3>LOGIN</h3>
+                    <h3>Login</h3>
                 </div>
             </div>
+            <p style="color:red;"> @ViewBag.Message </p>
             @using (Html.BeginForm("Login", "Logins", FormMethod.Post, new { id = "Loginform" }))
             {
-                <input type="email" asp-for="Email" class="form-control" placeholder="Email" />
+                <input type="email" asp-for="Email" class="form-control" placeholder="Email" required />
                 <input type="password" asp-for="Password" class="form-control" placeholder="Password" />
                 <button>login</button>
                 <p class="message">Not registered? <a asp-action="Register" asp-controller="Logins">Create an account</a></p>
@@ -79,6 +79,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
+
     </div>
+
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
 </body>
-</html> 
+</html>
+
+
