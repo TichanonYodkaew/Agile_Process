@@ -65,28 +65,44 @@
     @if (Model.HistoryPage != true)
     {
         <td>
-            @Html.ActionLink("History", "History", "Works", new
-                {
-                    HistoryID = Model.ID,
-                    RequseterFilter = Context.Session.GetString("RequseterFilter"),
-                    ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
-                    ProjectFilter = Context.Session.GetString("ProjectFilter"),
-                    StatusFilter = Context.Session.GetString("StatusFilter"),
-                    IsChangePage = true
+            @* <button class="button-glitch-warning" style="margin-right:10px;">
+                @Html.ActionLink("History", "History", "Works", new
+                    {
+                        HistoryID = Model.ID,
+                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                        StatusFilter = Context.Session.GetString("StatusFilter"),
+                        IsChangePage = true
 
-                }, new { @class = "btn btn-warning" })
+                    }, null)
+            </button> *@
+            <button class="button-glitch-warning" style="margin-right:10px;"
+                    onclick="location.href='@Url.Action("History", "Works", new
+                        {
+                            HistoryID = Model.ID,
+                            RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                            ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                            ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                            StatusFilter = Context.Session.GetString("StatusFilter"),
+                            IsChangePage = true
+                        })'">
+                History
+            </button>
 
-            @Html.ActionLink("Edit", "Edit", "Works", new
-                {
-                    EditID = Model.ID,
-                    RequseterFilter = Context.Session.GetString("RequseterFilter"),
-                    ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
-                    ProjectFilter = Context.Session.GetString("ProjectFilter"),
-                    StatusFilter = Context.Session.GetString("StatusFilter"),
-                    IsChangePage = true
+            <button class="button-glitch-primary" 
+            onclick="location.href='@Url.Action("Edit", "Works", new
+                    {
+                        EditID = Model.ID,
+                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                        StatusFilter = Context.Session.GetString("StatusFilter"),
+                        IsChangePage = true
 
-                }, new { @class = "btn btn-primary" })
-
+                    })'">
+                Edit
+            </button>
            @*  <a class="btn btn-primary" asp-action="History" asp-controller="Works" asp-route-id="@Model.ID">History</a>
             <a class="btn btn-warning" asp-action="Edit" asp-controller="Works" asp-route-id="@Model.ID">Edit</a> *@
         </td>

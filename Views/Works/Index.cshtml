@@ -21,82 +21,90 @@
 @using (Html.BeginForm("Index", "Works", FormMethod.Get, new { id = "filterform" }))
 {
 
-    <h1>รายการงาน (@Role)</h1>
+    @* <h1 data-text="รายการงาน (@Role)"></h1> *@
+    <p class="glitch-text">
+        <span aria-hidden="true">รายการงาน (@Role)</span>
+        รายการงาน (@Role)
+        <span aria-hidden="true">รายการงาน (@Role)</span>
+    </p>
 
     @Html.Editor(null, "FilterWork")
-
-    <table class="table table-bordered bg-white border-dark" style="width:1400px;">
-        <thead class="table-dark" style="text-align: center; vertical-align: middle;">
-            <tr>
-                <th style="width:8%">
-                    @Html.DisplayName("Created Date")
-                </th>
-                <th style="width:10%">
-                    @Html.DisplayName("Project")
-                </th>
-                <th style="width:10%">
-                    @Html.DisplayName("Name")
-                </th>
-                <th style="width:12%">
-                    @Html.DisplayName("Due Date")
-                </th>
-                <th style="width:8%">
-                    @Html.DisplayName("Assign By")
-                    <br />
-                    @Html.DisplayName("/ Requester")
-                </th>
-                <th style="width:20%">
-                    @Html.DisplayName("Assign To")
-                    <br />
-                    @Html.DisplayName("/ Provider")
-                </th>
-                <th style="width:9%">
-                    @Html.DisplayName("Status")
-                </th>
-                <th style="width:7%">
-                    @Html.DisplayName("Remark")
-                </th>
-                <th>
-                    @Html.DisplayName("Manage")
-                </th>
-            </tr>
-        </thead>
-        <tbody style="text-align: center; vertical-align: middle;">
-            @foreach (Work work in Model)
+}
+<table class="table table-bordered bg-white border-dark" style="width:1400px;">
+    <thead class="table-dark" style="text-align: center; vertical-align: middle;">
+        <tr>
+            <th style="width:8%">
+                @Html.DisplayName("Created Date")
+            </th>
+            <th style="width:10%">
+                @Html.DisplayName("Project")
+            </th>
+            <th style="width:10%">
+                @Html.DisplayName("Name")
+            </th>
+            <th style="width:12%">
+                @Html.DisplayName("Due Date")
+            </th>
+            <th style="width:8%">
+                @Html.DisplayName("Assign By")
+                <br />
+                @Html.DisplayName("/ Requester")
+            </th>
+            <th style="width:20%">
+                @Html.DisplayName("Assign To")
+                <br />
+                @Html.DisplayName("/ Provider")
+            </th>
+            <th style="width:9%">
+                @Html.DisplayName("Status")
+            </th>
+            <th style="width:7%">
+                @Html.DisplayName("Remark")
+            </th>
+            <th>
+                @Html.DisplayName("Manage")
+            </th>
+        </tr>
+    </thead>
+    <tbody style="text-align: center; vertical-align: middle;">
+        @foreach (Work work in Model)
+        {
+            if (work.RedFlag != true)
             {
-                if (work.RedFlag != true)
-                {
-                    @Html.DisplayFor(m => work)
-                }
-                else
-                {
-                    @Html.DisplayFor(m => work, "WorkRedNotic")
-                }
+                @Html.DisplayFor(m => work)
             }
-            <tr>
-                <td class="text-center" style="border-right: 1px solid white ;">
-                    @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
-                    @Html.ActionLink("Create task", "Create", "Works", new
+            else
+            {
+                @Html.DisplayFor(m => work, "WorkRedNotic")
+            }
+        }
+        <tr>
+            <td class="text-center" style="border-right: 1px solid white ;">
+                @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
+                <button class="button-glitch-primary" onclick="location.href='@Url.Action("Create", "Works", new
                         {
                             RequseterFilter = Context.Session.GetString("RequseterFilter"),
                             ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
                             ProjectFilter = Context.Session.GetString("ProjectFilter"),
                             StatusFilter = Context.Session.GetString("StatusFilter"),
                             IsChangePage = true
-                        }, new { @class = "btn btn-primary" })
-                </td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td style="border-right: 1px solid white ;"></td>
-                <td></td>
-            </tr>
-        </tbody>
-    </table>
-}
+                        })'">
+                    Create task
+                </button>
+
+            </td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td style="border-right: 1px solid white ;"></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
 
 
 @* <div>

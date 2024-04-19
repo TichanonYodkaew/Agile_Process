@@ -67,15 +67,27 @@
             
             <div style="float:right;">
                 @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works">Close</a> *@
-                @Html.ActionLink("Close", "Index", "Works", new
-                    {
-                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
-                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
-                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
-                        StatusFilter = Context.Session.GetString("StatusFilter"),
-                        IsChangePage = true
+                @* <button class="button-glitch-danger">
+                    @Html.ActionLink("Close", "Index", "Works", new
+                        {
+                            RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                            ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                            ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                            StatusFilter = Context.Session.GetString("StatusFilter"),
+                            IsChangePage = true
 
-                    }, new { @class = "btn btn-danger" })
+                        }, null)
+                </button> *@
+                <button class="button-glitch-danger" onclick="location.href='@Url.Action("Index", "Works", new
+                        {
+                            RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                            ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                            ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                            StatusFilter = Context.Session.GetString("StatusFilter"),
+                            IsChangePage = true
+                        })'">
+                    Close
+                </button>
             </div>
             <br />
             <div style="float:left;">

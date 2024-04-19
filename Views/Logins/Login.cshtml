@@ -59,7 +59,10 @@
         <div class="form">
             <div class="login">
                 <div class="login-header">
-                    <h3>Login</h3>
+                    @* <h3>Login</h3> *@
+                    <div class="t-glitch-wrapper">
+                        <div class="t-glitch" data-glitch="Login">Login</div>
+                    </div>
                 </div>
             </div>
             <p style="color:red;"> @ViewBag.Message </p>
@@ -67,7 +70,7 @@
             {
                 <input type="email" asp-for="Email" class="form-control" placeholder="Email" required />
                 <input type="password" asp-for="Password" class="form-control" placeholder="Password" />
-                <button>login</button>
+                <button>Login</button>
                 <p class="message">Not registered? <a asp-action="Register" asp-controller="Logins">Create an account</a></p>
             }
 
@@ -81,7 +84,7 @@
         }
 
     </div>
-@* 
+    @*
     <div class="bg"></div>
     <div class="bg bg2"></div>
     <div class="bg bg3"></div> *@

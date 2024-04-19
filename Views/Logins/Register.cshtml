@@ -57,7 +57,12 @@
 <body>
     <div class="container">
         <div class="registration form">
-            <header class="topics">Register</header>
+            @* <header class="topics">Register</header> *@
+            <header class="topics">
+                <div class="t-glitch-wrapper">
+                    <div class="t-glitch" data-glitch="Register">Register</div>
+                </div>
+            </header>
             <form asp-action="Register" asp-controller="Logins" id="Registerform">
                 <p style="color:red;"> @ViewBag.InputWarning </p>
 

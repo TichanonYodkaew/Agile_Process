@@ -7,7 +7,12 @@
     string Role = Context.Session.GetString("Default");
 }
 
-<h1>สร้างรายการงาน (@Role)</h1>
+@* <h1>สร้างรายการงาน (@Role)</h1> *@
+<p class="glitch-text">
+    <span aria-hidden="true">สร้างรายการงาน  (@Role)</span>
+    สร้างรายการงาน  (@Role)
+    <span aria-hidden="true">สร้างรายการงาน  (@Role)</span>
+</p>
 
 @using (Html.BeginForm("Create", "Works", FormMethod.Get, new { id = "filterform" }))
 {
@@ -72,14 +77,16 @@
         <tr>
             <td class="text-center" style="border-right: 1px solid white ;">
                 @* <a asp-action="Create" asp-controller="Works" class="btn btn-primary">Create</a> *@
-                @Html.ActionLink("Create task", "Create", "Works", new
-                    {
-                        RequseterFilter = Context.Session.GetString("RequseterFilter"),
-                        ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
-                        ProjectFilter = Context.Session.GetString("ProjectFilter"),
-                        StatusFilter = Context.Session.GetString("StatusFilter"),
-                        IsChangePage = true
-                    }, new { @class = "btn btn-primary" })
+                <button class="button-glitch-primary" onclick="location.href='@Url.Action("Create", "Works", new
+                        {
+                            RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                            ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                            ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                            StatusFilter = Context.Session.GetString("StatusFilter"),
+                            IsChangePage = true
+                        })'">
+                    Create task
+                </button>
             </td>
             <td style="border-right: 1px solid white ;"></td>
             <td style="border-right: 1px solid white ;"></td>

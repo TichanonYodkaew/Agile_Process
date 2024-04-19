@@ -11,8 +11,10 @@
 
 <div class="row">
     <div class="col">
-        <input type="button" id="OperatorButton" value="Operator" class="btn btn-warning" onclick="FuncOperator()" />
-        <input type="button" id="ControllerButton" value="Controller" class="btn btn-warning" onclick="FuncController()" />
+        @* <input type="button" id="OperatorButton" value="Operator" class="btn btn-warning" onclick="FuncOperator()" />
+        <input type="button" id="ControllerButton" value="Controller" class="btn btn-warning" onclick="FuncController()" /> *@
+        <button id="OperatorButton" class="button-glitch-danger" onclick="FuncOperator()">Operator</button>
+        <button id="ControllerButton" class="button-glitch-success" onclick="FuncController()">Controller</button>
     </div>
 </div>
 
@@ -55,7 +57,8 @@
         @Html.DropDownList("StatusFilter", new SelectList(StatusDropdownList, "Value", "Text", Context.Session.GetString("StatusFilter")), "Select Status", new { @class = "form-control-customdropdown" })
     </div>
     <div class="col-md-1">
-        <input type="submit" value="Search" class="btn btn-outline-secondary"/>
+        @* <input type="submit" value="Search" class="btn btn-outline-secondary"/> *@
+        <button type="submit" class="button-glitch-secondary" role="button">Search</button>
     </div>
 </div>
 <br />
@@ -110,7 +113,7 @@
                 nonSelectedText: 'Select Provider',
                 buttonContainer: '<div id="select-providerfilter-container"></div>',
                 selectedClass: 'active multiselect-selected',
-                numberDisplayed: 5,
+                numberDisplayed: 3,
                 buttonWidth: '18em',
                 includeSelectAllOption: true,
                 onSelectAll: function (options) {

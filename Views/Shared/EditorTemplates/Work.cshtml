@@ -68,9 +68,9 @@
             @Html.EditorFor(m => m.Remark, new { htmlAttributes = new { @class = "form-control" } })
         </td>
         <td>
-            <input value="Submit" class="btn btn-success" type="submit" />
+            @* <input value="Submit" class="btn btn-success" type="submit" /> *@
             @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a> *@
-            @Html.ActionLink("Cancel", "Index", "Works", new
+            @* @Html.ActionLink("Cancel", "Index", "Works", new
                 {
                     RequseterFilter = Context.Session.GetString("RequseterFilter"),
                     ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
@@ -78,7 +78,20 @@
                     StatusFilter = Context.Session.GetString("StatusFilter"),
                     IsChangePage = true
 
-                }, new { @class = "btn btn-danger" })
+                }, new { @class = "btn btn-danger" }) *@
+            <button class="button-glitch-success" type="submit">Submit</button>
+            @* <a class="btn btn-danger" asp-action="Index" asp-controller="Works" asp-route-id="@Model.ID">Cancel</a> *@
+            <button type="button" class="button-glitch-danger" onclick="location.href='@Url.Action("Index", "Works", new
+                {
+                    RequseterFilter = Context.Session.GetString("RequseterFilter"),
+                    ProviderFilterValue = Context.Session.GetString("ProviderFilterValue"),
+                    ProjectFilter = Context.Session.GetString("ProjectFilter"),
+                    StatusFilter = Context.Session.GetString("StatusFilter"),
+                    IsChangePage = true
+
+                })'">
+                Cancel
+            </button>
         </td>
     </tr>
 }
